@@ -2298,3 +2298,14 @@ window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>document.getEleme
 </script>
 </body>
 </html>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const supabaseUrl = 'https://pnovrrkykimjknqdhoww.supabase.co';
+  const supabaseKey = 'sb_publishable_mHCsBIqRC5QN6QJLc753TQ_aRABbSwo';
+
+  window.supabase = createClient(supabaseUrl, supabaseKey);
+  console.log("Supabase connected successfully!");
+</script>
+
