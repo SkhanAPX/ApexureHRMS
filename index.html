@@ -5,26 +5,30 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Apexure HRMS v3</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@600&display=swap" rel="stylesheet"/>
-<!-- Supabase JS Client SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0D1B2A;--surface:#111F30;--surface2:#162840;--surface3:#1C3050;
---border:#1E3A5F;--border2:#265080;
---text:#E2EAF4;--muted:#7A95B0;--faint:#3A5878;
---accent:#4F6EF7;--accent-dim:rgba(79,110,247,.12);
---amber:#F6A823;--amber-dim:rgba(246,168,35,.1);
---red:#F05252;--red-dim:rgba(240,82,82,.1);
---green:#22C55E;--green-dim:rgba(34,197,94,.1);
---font:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;--head:'Playfair Display',serif;
---sidebar:230px;--r:5px;}
+:root{
+  --bg:#0D1B2A;--surface:#111F30;--surface2:#162840;--surface3:#1C3050;
+  --border:#1E3A5F;--border2:#265080;
+  --text:#E2EAF4;--muted:#7A95B0;--faint:#3A5878;
+  --accent:#4F6EF7;--accent-dim:rgba(79,110,247,.12);
+  --amber:#F6A823;--amber-dim:rgba(246,168,35,.1);
+  --red:#F05252;--red-dim:rgba(240,82,82,.1);
+  --green:#22C55E;--green-dim:rgba(34,197,94,.1);
+  --purple:#8B5CF6;--purple-dim:rgba(139,92,246,.1);
+  --teal:#06B6D4;--teal-dim:rgba(6,182,212,.1);
+  --font:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;--head:'Playfair Display',serif;
+  --sidebar:230px;--r:5px;
+}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;line-height:1.5}
 button,input,select,textarea{font-family:var(--font);font-size:13px}
+/* LOGIN */
 #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
 .login-box{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:36px 40px;width:390px}
 .login-logo{font-family:var(--head);font-size:20px;color:var(--text);margin-bottom:4px}
 .login-sub{font-size:11px;color:var(--muted);margin-bottom:28px}
 .login-err{background:var(--red-dim);border:1px solid rgba(240,82,82,.2);color:var(--red);padding:8px 10px;border-radius:var(--r);font-size:11px;margin-bottom:12px;display:none}
+/* LAYOUT */
 .app{display:flex;height:100vh;overflow:hidden}
 .sidebar{width:var(--sidebar);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
 .brand{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
@@ -34,66 +38,278 @@ button,input,select,textarea{font-family:var(--font);font-size:13px}
 .nav-btn{display:flex;align-items:center;gap:8px;width:calc(100% - 8px);margin:1px 4px;padding:7px 10px;border-radius:var(--r);background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-align:left;transition:all .15s}
 .nav-btn:hover{background:var(--surface2);color:var(--text)}
 .nav-btn.active{background:var(--accent-dim);color:var(--accent);font-weight:500}
+.nav-btn .icon{width:16px;text-align:center;font-size:13px}
 .sidebar-footer{margin-top:auto;padding:10px 12px;border-top:1px solid var(--border)}
+.notice{background:var(--amber-dim);border:1px solid rgba(246,168,35,.2);border-radius:var(--r);padding:8px 10px;font-size:10px;color:var(--amber);line-height:1.5}
 .user-chip{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:var(--r);margin-bottom:8px}
 .user-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0}
 .user-name{font-size:11px;font-weight:500;color:var(--text)}
 .user-role{font-size:10px;color:var(--muted)}
+/* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .topbar{height:48px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
 .page-title{font-family:var(--head);font-size:17px;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:8px}
 .content{flex:1;overflow-y:auto;padding:20px}
+.bell-btn{position:relative;background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:4px 8px;border-radius:var(--r)}
+.bell-btn:hover{color:var(--text)}
+.bell-dot{position:absolute;top:2px;right:4px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--surface);display:none}
+/* REMINDER PANEL */
+.reminder-panel{position:fixed;top:48px;right:0;width:320px;background:var(--surface);border-left:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:0 0 0 8px;z-index:150;max-height:70vh;overflow-y:auto;box-shadow:-4px 4px 20px rgba(0,0,0,.4);display:none}
+.reminder-panel.open{display:block}
+.rp-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.rp-item{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start}
+/* SECTIONS */
 .section{display:none}.section.active{display:block}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:7px;margin-bottom:14px;overflow:hidden}
-.card-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .card-title{font-size:13px;font-weight:600;color:var(--text)}
 .card-body{padding:16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:14px 16px}
+.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.stat-val{font-family:var(--head);font-size:24px;color:var(--text)}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px}
+/* FORMS */
 .form-row{display:grid;gap:12px;margin-bottom:12px}
-.r3{grid-template-columns:1fr 1fr 1fr}
+.r2{grid-template-columns:1fr 1fr}.r3{grid-template-columns:1fr 1fr 1fr}.r4{grid-template-columns:1fr 1fr 1fr 1fr}
 .fg{display:flex;flex-direction:column}
 label{font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:500}
-input,select,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:7px 9px;color:var(--text);outline:none;width:100%}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:var(--r);font-size:12px;font-weight:500;border:none;cursor:pointer}
+input[type=text],input[type=number],input[type=date],input[type=email],input[type=password],input[type=month],select,textarea{
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);
+  padding:7px 9px;color:var(--text);outline:none;width:100%;transition:border-color .15s
+}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+input[readonly]{background:var(--surface);color:var(--muted);cursor:not-allowed}
+textarea{resize:vertical;min-height:70px}
+select option{background:var(--surface2)}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:var(--r);font-size:12px;font-weight:500;border:none;cursor:pointer;transition:opacity .15s}
+.btn:hover{opacity:.85}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
-.alert{padding:9px 12px;border-radius:var(--r);font-size:11px;line-height:1.6;margin-bottom:12px;background:var(--amber-dim);border:1px solid rgba(246,168,35,.2);color:var(--amber)}
+.btn-ghost{background:none;color:var(--muted);border:1px solid var(--border)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(240,82,82,.2)}
+.btn-green{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.btn-amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(246,168,35,.2)}
+.btn-sm{padding:4px 9px;font-size:11px}.btn-xs{padding:2px 7px;font-size:10px}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-size:10px;font-weight:600;color:var(--muted);padding:7px 10px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);font-size:12px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.tbl-wrap{overflow-x:auto}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600;white-space:nowrap}
+.b-accent{background:var(--accent-dim);color:var(--accent)}.b-green{background:var(--green-dim);color:var(--green)}
+.b-amber{background:var(--amber-dim);color:var(--amber)}.b-red{background:var(--red-dim);color:var(--red)}
+.b-purple{background:var(--purple-dim);color:var(--purple)}.b-teal{background:var(--teal-dim);color:var(--teal)}
+.b-muted{background:rgba(122,149,176,.1);color:var(--muted)}
+.alert{padding:9px 12px;border-radius:var(--r);font-size:11px;line-height:1.6;margin-bottom:12px;display:flex;gap:8px}
+.a-amber{background:var(--amber-dim);border:1px solid rgba(246,168,35,.2);color:var(--amber)}
+.a-red{background:var(--red-dim);border:1px solid rgba(240,82,82,.2);color:var(--red)}
+.a-green{background:var(--green-dim);border:1px solid rgba(34,197,94,.2);color:var(--green)}
+.a-accent{background:var(--accent-dim);border:1px solid rgba(79,110,247,.2);color:var(--accent)}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:7px 13px;font-size:12px;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;margin-bottom:-1px;transition:all .15s}
+.tab:hover{color:var(--text)}.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.breakdown{background:var(--surface2);border-radius:var(--r);padding:12px;margin-top:10px}
+.br-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px}
+.br-row:last-child{border-bottom:none;font-weight:600;padding-top:7px;margin-top:3px}
+.br-label{color:var(--muted)}.br-val{font-family:var(--mono);color:var(--text)}
+.br-formula{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:1px}
+.prog{height:5px;background:var(--surface3);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px;transition:width .4s}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:8px;width:92%;max-width:640px;max-height:92vh;overflow-y:auto}
+.modal-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-body{padding:18px}.modal-foot{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+.search-bar{display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
+.search-bar input{max-width:240px}
+.cl-item{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid var(--border)}
+.cl-item:last-child{border-bottom:none}
+.cl-item input[type=checkbox]{margin-top:2px;accent-color:var(--accent);width:14px;height:14px;flex-shrink:0;cursor:pointer}
+.cl-item label{font-size:12px;color:var(--text);cursor:pointer;margin:0}.cl-item.done label{text-decoration:line-through;color:var(--muted)}
+.cl-cat{font-size:10px;color:var(--faint);margin-top:1px}
+.mono{font-family:var(--mono)}
+.hr-flag{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 6px;border-radius:3px;background:var(--amber-dim);color:var(--amber);font-weight:500}
+.access-denied{display:flex;flex-direction:column;align-items:center;justify-content:center;height:240px;gap:12px;color:var(--muted)}
+.perm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.perm-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface2);border-radius:var(--r);font-size:11px;cursor:pointer}
+.perm-item input{accent-color:var(--accent);width:14px;height:14px;flex-shrink:0}
+/* LEVEL CARD */
+.level-card{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:10px}
+.level-card-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.level-badge{padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;background:var(--accent-dim);color:var(--accent);white-space:nowrap}
+/* WEIGHT BAR */
+.weight-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:8px 0}
+.ws-a{background:var(--accent);transition:width .3s}
+.ws-b{background:var(--purple);transition:width .3s}
+.ws-c{background:var(--teal);transition:width .3s}
+/* DEPT PILL NAV */
+.dept-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.dept-pill{padding:5px 12px;border-radius:20px;font-size:11px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s}
+.dept-pill:hover{color:var(--text);border-color:var(--border2)}
+.dept-pill.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(79,110,247,.3)}
+/* DISCRETION BADGE */
+.disc-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;background:var(--purple-dim);color:var(--purple);border:1px solid rgba(139,92,246,.2)}
 </style>
 </head>
 <body>
+
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">Apexure HRMS</div>
     <div class="login-sub">Apexure India Pvt. Ltd. · Sign in to continue</div>
     <div class="login-err" id="login-err">Invalid username or password.</div>
-    <div class="form-row" style="margin-bottom:10px"><div class="fg"><label>Username</label><input type="text" id="login-user" value="superadmin"/></div></div>
-    <div class="form-row" style="margin-bottom:18px"><div class="fg"><label>Password</label><input type="password" id="login-pass" value="admin123"/></div></div>
+    <div class="form-row" style="margin-bottom:10px"><div class="fg"><label>Username</label><input type="text" id="login-user" placeholder="e.g. superadmin" onkeydown="if(event.key==='Enter')doLogin()"/></div></div>
+    <div class="form-row" style="margin-bottom:18px"><div class="fg"><label>Password</label><input type="password" id="login-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/></div></div>
     <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Sign In</button>
+    <div style="margin-top:14px;background:var(--surface2);border-radius:var(--r);padding:10px 12px;font-size:10px;color:var(--muted);line-height:1.9">
+      <strong style="color:var(--text)">Demo credentials</strong><br/>
+      superadmin / admin123 &nbsp;·&nbsp; admin1 / admin123 &nbsp;·&nbsp; admin2 / admin123<br/>
+      manager1 / mgr123 &nbsp;·&nbsp; manager2 / mgr123 &nbsp;·&nbsp; reviewer1 / rev123
+    </div>
   </div>
 </div>
 
 <div class="app" id="app-root" style="display:none">
-  <nav class="sidebar">
-    <div class="brand"><div class="brand-name">Apexure HRMS</div><div class="brand-sub">v3 · Supabase Live</div></div>
-    <div class="nav-group">Core</div>
-    <button class="nav-btn active" onclick="nav('appraisal')">Appraisals</button>
-    <div class="sidebar-footer">
-      <button class="btn btn-secondary" style="width:100%;justify-content:center" onclick="doLogout()">Sign Out</button>
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="brand"><div class="brand-name">Apexure HRMS</div><div class="brand-sub" id="brand-sub">v3</div></div>
+  <div class="nav-group">Core</div>
+  <button class="nav-btn active" id="nav-dashboard" onclick="nav('dashboard')"><span class="icon">◈</span>Dashboard</button>
+  <button class="nav-btn" id="nav-employees" onclick="nav('employees')"><span class="icon">👤</span>Employee Master</button>
+  <div class="nav-group">People</div>
+  <button class="nav-btn" id="nav-career" onclick="nav('career')"><span class="icon">📐</span>Career Levels</button>
+  <button class="nav-btn" id="nav-appraisal" onclick="nav('appraisal')"><span class="icon">📋</span>Appraisals</button>
+  <button class="nav-btn" id="nav-levelreview" onclick="nav('levelreview')"><span class="icon">🎯</span>Level Review</button>
+  <button class="nav-btn" id="nav-schedule" onclick="nav('schedule')"><span class="icon">📅</span>Schedule</button>
+  <button class="nav-btn" id="nav-increment" onclick="nav('increment')"><span class="icon">📈</span>Increment Calc</button>
+  <div class="nav-group">Finance</div>
+  <button class="nav-btn" id="nav-payroll" onclick="nav('payroll')"><span class="icon">₹</span>Payroll & CTC</button>
+  <div class="nav-group">Operations</div>
+  <button class="nav-btn" id="nav-leave" onclick="nav('leave')"><span class="icon">🗓</span>Leave Tracker</button>
+  <button class="nav-btn" id="nav-operations" onclick="nav('operations')"><span class="icon">🔄</span>HR Operations</button>
+  <div class="nav-group">Admin</div>
+  <button class="nav-btn" id="nav-admin" onclick="nav('admin')"><span class="icon">⚙</span>Access & Users</button>
+  <button class="nav-btn" id="nav-settings" onclick="nav('settings')"><span class="icon">🛠</span>Settings</button>
+  <button class="nav-btn" id="nav-reminders" onclick="nav('reminders')"><span class="icon">🔔</span>Reminders</button>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar" id="user-avatar" style="background:var(--accent)">SA</div>
+      <div><div class="user-name" id="user-display-name">Super Admin</div><div class="user-role" id="user-display-role">Super Admin</div></div>
     </div>
-  </nav>
-  <div class="main">
-    <div class="topbar"><span class="page-title">Appraisals</span></div>
-    <div class="content">
-      <div id="s-appraisal" class="section active">
-        <div class="alert">Supabase Database Connection Active. Forms will write straight to your production tables.</div>
-        <div class="card">
-          <div class="card-head"><span class="card-title">Appraisal Form</span></div>
-          <div class="card-body">
-            <div class="form-row r3">
-              <div class="fg"><label>Employee Name</label><input type="text" id="apr-emp" value="Riya Sharma"/></div>
-              <div class="fg"><label>Appraisal Period</label><input type="text" id="apr-period" value="Annual 2024–25"/></div>
-              <div class="fg"><label>Score (0-100)</label><input type="text" id="final-score" value="88"/></div>
-            </div>
-            <button class="btn btn-primary" onclick="saveAppraisal()">Save Appraisal to Supabase</button>
+    <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;margin-bottom:6px" onclick="doLogout()">Sign Out</button>
+    <div class="notice">⚠ Browser session only. No external connections. All data fictional.</div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <span class="page-title" id="page-title">Dashboard</span>
+    <div class="topbar-right">
+      <span class="badge b-amber">Fictional Data</span>
+      <span class="badge b-accent" id="topbar-role">Super Admin</span>
+      <button class="bell-btn" onclick="toggleReminderPanel()" title="Reminders">🔔<span class="bell-dot" id="bell-dot"></span></button>
+    </div>
+  </div>
+  <div class="reminder-panel" id="reminder-panel">
+    <div class="rp-head"><span style="font-size:12px;font-weight:600">Reminders</span><button class="btn btn-ghost btn-xs" onclick="toggleReminderPanel()">✕</button></div>
+    <div id="rp-list"></div>
+  </div>
+  <div class="content">
+
+<!-- ███ DASHBOARD ███ -->
+<div id="s-dashboard" class="section active">
+  <div class="alert a-amber"><span>⚠</span><div><strong>Prototype:</strong> All data fictional. Browser session only — data lost on refresh. No external system connections. All scoring and increment results require human HR approval before any action.</div></div>
+  <div class="g4" style="margin-bottom:14px" id="dash-stats"></div>
+  <div class="g2">
+    <div class="card"><div class="card-head"><span class="card-title">Upcoming Appraisals (90 days)</span></div><div class="tbl-wrap"><table class="tbl" id="dash-appr-tbl"></table></div></div>
+    <div class="card"><div class="card-head"><span class="card-title">Score Distribution · Last Cycle</span></div><div class="card-body" id="dash-dist"></div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-head"><span class="card-title">Pending Actions</span><span class="hr-flag">⚠ HR Required</span></div><div class="card-body" id="dash-pending"></div></div>
+    <div class="card"><div class="card-head"><span class="card-title">Upcoming Reminders</span></div><div class="card-body" id="dash-rem-preview"></div></div>
+  </div>
+</div>
+
+<!-- ███ EMPLOYEES ███ -->
+<div id="s-employees" class="section">
+  <div class="search-bar">
+    <input type="text" id="emp-search" placeholder="Name, ID, dept…" oninput="renderEmpTable()"/>
+    <select id="emp-dept-f" onchange="renderEmpTable()" style="max-width:170px">
+      <option value="">All Departments</option>
+    </select>
+    <button class="btn btn-primary" id="btn-add-emp" onclick="openEmpModal()">+ Add Employee</button>
+    <button class="btn btn-ghost" onclick="exportTbl('emp-tbl','employees.csv')">Export CSV</button>
+  </div>
+  <div class="card"><div class="tbl-wrap"><table class="tbl" id="emp-tbl">
+    <thead><tr><th>ID</th><th>Name</th><th>Designation</th><th>Dept</th><th>Level</th><th>DoJ</th><th>Status</th><th>Gross/mo</th><th>Manager</th><th></th></tr></thead>
+    <tbody id="emp-tbody"></tbody>
+  </table></div></div>
+</div>
+
+<!-- ███ CAREER LEVELS ███ -->
+<div id="s-career" class="section">
+  <div class="alert a-accent"><span>ℹ</span><div>Each department has its own career ladder with custom level names. Levels are capability-based, not title-based. <strong>Level-up is never automatic</strong> — it is a separate process from appraisal, requires HR discretion, and for Senior→Management also requires role availability.</div></div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('cl','levels')">Department Ladders</button>
+    <button class="tab" onclick="switchTab('cl','salary-ref')">Salary Increment Reference</button>
+    <button class="tab" onclick="switchTab('cl','depts')">Manage Departments</button>
+    <button class="tab" onclick="switchTab('cl','rules')">Level-Up Rules</button>
+  </div>
+
+  <!-- DEPT LADDERS -->
+  <div id="cl-levels" class="tab-pane active">
+    <div class="dept-pills" id="career-dept-pills"></div>
+    <div id="career-ladder-body"></div>
+  </div>
+
+  <!-- SALARY INCREMENT REFERENCE PER LEVEL -->
+  <div id="cl-salary-ref" class="tab-pane">
+    <div class="alert a-amber"><span>⚠</span><div>These are reference ranges only — displayed during level review and increment planning. They are <em>not</em> automatic. Super Admin and Admins can edit. All changes are session-only.</div></div>
+    <div class="dept-pills" id="salary-ref-dept-pills"></div>
+    <div id="salary-ref-body"></div>
+  </div>
+
+  <!-- MANAGE DEPARTMENTS -->
+  <div id="cl-depts" class="tab-pane">
+    <div class="alert a-amber"><span>⚠</span><div>Super Admin only. Adding a department creates a new career ladder and KPI template. Renaming a department updates all references. Removing a department is only allowed if no active employees belong to it.</div></div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Departments</span><button class="btn btn-primary btn-sm" onclick="openDeptModal()">+ Add Department</button></div>
+      <div class="tbl-wrap"><table class="tbl" id="dept-tbl">
+        <thead><tr><th>Department Name</th><th>Employees</th><th>Levels</th><th>KPI Template</th><th>Actions</th></tr></thead>
+        <tbody id="dept-tbody"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- LEVEL-UP RULES -->
+  <div id="cl-depts-active" style="display:none"></div>
+  <div id="cl-rules" class="tab-pane">
+    <div class="alert a-accent"><span>ℹ</span><div>These rules govern <strong>eligibility review only</strong> — they do not trigger automatic promotion. Senior → Management is always management discretion + role availability.</div></div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Global Level Review Rules</span><button class="btn btn-primary btn-sm" onclick="saveLevelRules()">Save Rules</button></div>
+      <div class="card-body">
+        <div class="form-row r3">
+          <div class="fg"><label>Min months in level before eligibility review</label><input type="number" id="lr-min-months" value="18"/></div>
+          <div class="fg"><label>Min appraisal score for eligibility (0–100)</label><input type="number" id="lr-min-score" value="70"/></div>
+          <div class="fg"><label>Min consecutive years at this score</label><input type="number" id="lr-min-years" value="1"/></div>
+        </div>
+        <div class="form-row r2">
+          <div class="fg"><label>Annual appraisal cycle (months)</label><input type="number" id="lr-cycle" value="12"/></div>
+          <div class="fg"><label>If not eligible this year — next review (months)</label><input type="number" id="lr-defer" value="12"/></div>
+        </div>
+        <div class="alert a-amber" style="margin-top:6px"><span>⚠</span><div><strong>Senior → Management:</strong> This transition is <em>always</em> at management discretion and depends on an available management role. It is <strong>never triggered by score alone</strong>. HR marks this separately in the Level Review module.</div></div>
+        <div style="margin-top:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">Appraisal Cycle Settings</div>
+          <div class="form-row r2">
+            <div class="fg"><label>Annual appraisals before biennial cycle</label><input type="number" id="lr-annual-count" value="3"/></div>
+            <div class="fg"><label>Biennial cycle length (years)</label><input type="number" id="lr-biennial" value="2"/></div>
           </div>
         </div>
       </div>
@@ -101,62 +317,1984 @@ input,select,textarea{background:var(--surface2);border:1px solid var(--border);
   </div>
 </div>
 
-<script>
-// Supabase Client Initialization with New Publishable Key
-const SUPABASE_URL = 'https://pnovrrkykimjknqdhoww.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_mHCsBIqRC5QN6QJLc753TQ_aRABbSwo';
+<!-- ███ APPRAISALS ███ -->
+<div id="s-appraisal" class="section">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('apr','form')">Appraisal Form</button>
+    <button class="tab" onclick="switchTab('apr','records')">Records</button>
+    <button class="tab" onclick="switchTab('apr','weights')">Section Weights</button>
+    <button class="tab" onclick="switchTab('apr','kpi-config')">KPI Templates</button>
+    <button class="tab" onclick="switchTab('apr','bands')">Bands & Scores</button>
+  </div>
+  <div id="apr-form" class="tab-pane active">
+    <div class="alert a-amber"><span>⚠</span><div>Managers fill Section A (KPIs). HR fills Sections B & C. Appraisal score ≠ level change. Level review is a separate process.</div></div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Combined Appraisal Form</span><span class="hr-flag">⚠ HR Approval Before Finalising</span></div>
+      <div class="card-body">
+        <div class="form-row r3">
+          <div class="fg"><label>Employee</label><select id="apr-emp" onchange="loadAprTemplate()"><option value="">Select</option></select></div>
+          <div class="fg"><label>Appraisal Period</label><input type="text" id="apr-period" value="Annual 2024–25"/></div>
+          <div class="fg"><label>Appraiser</label><input type="text" id="apr-manager"/></div>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:12px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+            <span>Section A — Role / Department KPIs <span class="badge b-accent" id="badge-wA">70%</span></span>
+            <span style="font-size:10px;color:var(--muted)">Entered by Manager</span>
+          </div>
+          <table class="tbl"><thead><tr><th style="width:34%">KPI</th><th>Target</th><th>Actual</th><th>Rating 0–10</th><th>Weight %</th><th>Wtd Score</th></tr></thead>
+          <tbody id="kpi-tbody"></tbody></table>
+          <div style="margin-top:8px;display:flex;gap:8px"><button class="btn btn-secondary btn-sm" onclick="addKPIRow()">+ Add KPI</button><span style="font-size:11px;color:var(--muted);align-self:center">KPI weights within Section A must total 100%</span></div>
+          <div class="breakdown" style="margin-top:10px">
+            <div class="br-row"><span class="br-label">Section A Raw (0–100)</span><span class="br-val" id="apr-a-raw">—</span></div>
+            <div class="br-formula">Σ (Rating/10 × 100 × KPI_Weight%) normalised to 0–100</div>
+          </div>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:12px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+            <span>Section B — Discipline, Attendance & Conduct <span class="badge b-purple" id="badge-wB">20%</span></span>
+            <span style="font-size:10px;color:var(--muted)">HR enters / validates</span>
+          </div>
+          <div class="form-row r3">
+            <div class="fg"><label>Attendance (0–10)</label><input type="number" id="b-attendance" min="0" max="10" step="0.5" oninput="calcApr()"/></div>
+            <div class="fg"><label>Punctuality (0–10)</label><input type="number" id="b-punctuality" min="0" max="10" step="0.5" oninput="calcApr()"/></div>
+            <div class="fg"><label>Leave Discipline (0–10)</label><input type="number" id="b-leave" min="0" max="10" step="0.5" oninput="calcApr()"/></div>
+          </div>
+          <div class="form-row r2">
+            <div class="fg"><label>Workplace Conduct (0–10)</label><input type="number" id="b-conduct" min="0" max="10" step="0.5" oninput="calcApr()"/></div>
+            <div class="fg"><label>Collaboration (0–10)</label><input type="number" id="b-collab" min="0" max="10" step="0.5" oninput="calcApr()"/></div>
+          </div>
+          <div class="breakdown"><div class="br-row"><span class="br-label">Section B Raw</span><span class="br-val" id="apr-b-raw">—</span></div><div class="br-formula">Average of 5 sub-scores × 10</div></div>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:12px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+            <span>Section C — Learning & Upskilling <span class="badge b-teal" id="badge-wC">10%</span></span>
+            <span style="font-size:10px;color:var(--muted)">HR enters</span>
+          </div>
+          <div class="form-row r3">
+            <div class="fg"><label>Certificates / Courses</label><input type="number" id="c-certs" min="0" max="10" oninput="calcApr()"/></div>
+            <div class="fg"><label>Training Participation (0–10)</label><input type="number" id="c-training" min="0" max="10" step="0.5" oninput="calcApr()"/></div>
+            <div class="fg"><label>Applied New Skills (0–10)</label><input type="number" id="c-applied" min="0" max="10" step="0.5" oninput="calcApr()"/></div>
+          </div>
+          <div class="breakdown"><div class="br-row"><span class="br-label">Section C Raw</span><span class="br-val" id="apr-c-raw">—</span></div><div class="br-formula">(Certs/10×40) + (Training/10×30) + (Applied/10×30)</div></div>
+        </div>
+        <div class="breakdown" style="background:var(--surface3);border:1px solid var(--border)">
+          <div class="br-row"><span class="br-label" id="fl-a">Section A (70%)</span><span class="br-val" id="final-a">—</span></div>
+          <div class="br-row"><span class="br-label" id="fl-b">Section B (20%)</span><span class="br-val" id="final-b">—</span></div>
+          <div class="br-row"><span class="br-label" id="fl-c">Section C (10%)</span><span class="br-val" id="final-c">—</span></div>
+          <div class="br-row" style="font-size:14px"><span>Final Weighted Score</span><span class="br-val" id="final-score" style="font-size:18px;color:var(--accent)">—</span></div>
+          <div class="br-row"><span>Performance Band</span><span id="final-band">—</span></div>
+          <div class="br-formula" id="final-formula">Formula: (A×0.70)+(B×0.20)+(C×0.10)</div>
+        </div>
+        <div class="form-row r2" style="margin-top:14px">
+          <div class="fg"><label>Manager Comments</label><textarea id="apr-mgr-comment" placeholder="Strengths, improvement areas, goals…"></textarea></div>
+          <div class="fg"><label>HR Notes</label><textarea id="apr-hr-note" placeholder="HR validation, exceptions, context…"></textarea></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn btn-primary" onclick="saveAppraisal()">Save Appraisal</button>
+          <button class="btn btn-secondary" onclick="calcApr()">Recalculate</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="apr-records" class="tab-pane">
+    <div class="search-bar">
+      <input type="text" id="apr-search" placeholder="Search records…" oninput="renderAprRecords()"/>
+      <button class="btn btn-ghost" onclick="exportTbl('apr-tbl','appraisals.csv')">Export CSV</button>
+    </div>
+    <div class="card"><div class="tbl-wrap"><table class="tbl" id="apr-tbl">
+      <thead><tr><th>Employee</th><th>Dept</th><th>Period</th><th>Score</th><th>Band</th><th>Manager</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="apr-tbody"></tbody>
+    </table></div></div>
+  </div>
+  <div id="apr-weights" class="tab-pane">
+    <div class="alert a-accent"><span>ℹ</span><div>Change appraisal section weights freely. Must total 100%. Applies to all future calculations. Past records are not recalculated.</div></div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Section Weights (Fully Configurable)</span><button class="btn btn-primary btn-sm" onclick="saveWeights()">Save Weights</button></div>
+      <div class="card-body">
+        <div class="form-row r3">
+          <div class="fg"><label>Section A — KPIs (%)</label><input type="number" id="wt-a" value="70" oninput="updateWeightBar()"/></div>
+          <div class="fg"><label>Section B — Discipline (%)</label><input type="number" id="wt-b" value="20" oninput="updateWeightBar()"/></div>
+          <div class="fg"><label>Section C — Learning (%)</label><input type="number" id="wt-c" value="10" oninput="updateWeightBar()"/></div>
+        </div>
+        <div class="weight-bar"><div class="ws-a" id="wbar-a" style="width:70%"></div><div class="ws-b" id="wbar-b" style="width:20%"></div><div class="ws-c" id="wbar-c" style="width:10%"></div></div>
+        <div style="display:flex;gap:14px;font-size:11px;color:var(--muted)">
+          <span><span style="width:10px;height:10px;background:var(--accent);border-radius:2px;display:inline-block;margin-right:4px"></span>A</span>
+          <span><span style="width:10px;height:10px;background:var(--purple);border-radius:2px;display:inline-block;margin-right:4px"></span>B</span>
+          <span><span style="width:10px;height:10px;background:var(--teal);border-radius:2px;display:inline-block;margin-right:4px"></span>C</span>
+          <span id="wt-total" style="margin-left:auto;font-weight:600;color:var(--text)">Total: 100%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="apr-kpi-config" class="tab-pane">
+    <div class="alert a-accent"><span>ℹ</span><div>Each department has its own KPI template. HR configures; managers rate against them in the appraisal form.</div></div>
+    <div id="kpi-templates-body"></div>
+  </div>
+  <div id="apr-bands" class="tab-pane">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Performance Band Thresholds (Configurable)</span><button class="btn btn-primary btn-sm" onclick="saveBands()">Save</button></div>
+      <div class="card-body">
+        <table class="tbl"><thead><tr><th>Band</th><th>Min Score</th><th>Max Score</th><th>Label</th></tr></thead><tbody>
+          <tr><td><span class="badge b-green">Exceptional</span></td><td><input type="number" id="band-exc-min" value="90" style="width:80px"/></td><td><input type="number" id="band-exc-max" value="100" style="width:80px"/></td><td><input type="text" id="band-exc-label" value="Exceptional" style="width:160px"/></td></tr>
+          <tr><td><span class="badge b-accent">Strong</span></td><td><input type="number" id="band-str-min" value="80" style="width:80px"/></td><td><input type="number" id="band-str-max" value="89.99" style="width:80px"/></td><td><input type="text" id="band-str-label" value="Strong" style="width:160px"/></td></tr>
+          <tr><td><span class="badge b-amber">Meets</span></td><td><input type="number" id="band-mts-min" value="70" style="width:80px"/></td><td><input type="number" id="band-mts-max" value="79.99" style="width:80px"/></td><td><input type="text" id="band-mts-label" value="Meets Expectations" style="width:160px"/></td></tr>
+          <tr><td><span class="badge b-red">Below</span></td><td><input type="number" id="band-blw-min" value="0" style="width:80px"/></td><td><input type="number" id="band-blw-max" value="69.99" style="width:80px"/></td><td><input type="text" id="band-blw-label" value="Below Expectations" style="width:160px"/></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
 
-let supabaseClient = null;
-try {
-  if (window.supabase) {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-  }
-} catch(e) { console.error("Supabase init error", e); }
+<!-- ███ LEVEL REVIEW ███ -->
+<div id="s-levelreview" class="section">
+  <div class="alert a-accent"><span>ℹ</span><div><strong>Level review is completely separate from appraisal.</strong> Eligibility is checked here based on time-in-level and appraisal history. HR and management decide whether to promote. No automatic level or salary change ever occurs.</div></div>
+  <div class="alert a-purple" style="background:var(--purple-dim);border:1px solid rgba(139,92,246,.2);color:var(--purple)"><span>🎯</span><div><strong>Senior → Management transition:</strong> Always management discretion. Requires an available management role. HR marks this with a Discretionary flag — the system never recommends it automatically.</div></div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Level Review Dashboard</span><button class="btn btn-ghost btn-sm" onclick="exportTbl('lr-tbl','level_review.csv')">Export CSV</button></div>
+    <div class="tbl-wrap"><table class="tbl" id="lr-tbl">
+      <thead><tr><th>Employee</th><th>Dept</th><th>Current Level</th><th>Level Name</th><th>Months in Level</th><th>Last Score</th><th>Eligibility</th><th>Next Review</th><th>Notes / Action</th></tr></thead>
+      <tbody id="lr-tbody"></tbody>
+    </table></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Record a Level Change</span><span class="hr-flag">⚠ HR + Management sign-off</span></div>
+    <div class="card-body">
+      <div class="form-row r3">
+        <div class="fg"><label>Employee</label><select id="lc-emp" onchange="prefillLevelChange()"><option value="">Select</option></select></div>
+        <div class="fg"><label>New Level</label><select id="lc-new-level"><option value="">Select new level</option></select></div>
+        <div class="fg"><label>Effective Date</label><input type="date" id="lc-date"/></div>
+      </div>
+      <div class="form-row r2">
+        <div class="fg"><label>Decision Type</label><select id="lc-type">
+          <option value="standard">Standard Level-Up (performance eligible)</option>
+          <option value="discretionary">Discretionary (Senior → Management / role-based)</option>
+          <option value="skip">Skip Level (exceptional case)</option>
+          <option value="lateral">Lateral (same level, dept change)</option>
+        </select></div>
+        <div class="fg"><label>Management Role Available (for Senior→Mgmt)</label><select id="lc-role-avail">
+          <option value="na">N/A — not a management transition</option>
+          <option value="yes">Yes — confirmed vacancy exists</option>
+          <option value="no">No — hold decision</option>
+        </select></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Justification / Notes (required)</label><textarea id="lc-notes" placeholder="Reason for level change, who approved, context…"></textarea></div>
+      </div>
+      <div class="alert a-amber"><span>⚠</span><div>Recording a level change here updates the employee record only in this session. Salary revision must be done separately in Payroll module after formal approval.</div></div>
+      <button class="btn btn-primary" onclick="saveLevelChange()">Record Level Change</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Level Change History</span></div>
+    <div class="tbl-wrap"><table class="tbl" id="lch-tbl">
+      <thead><tr><th>Employee</th><th>From</th><th>To</th><th>Type</th><th>Date</th><th>By</th><th>Notes</th></tr></thead>
+      <tbody id="lch-tbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ███ SCHEDULE ███ -->
+<div id="s-schedule" class="section">
+  <div class="card">
+    <div class="card-head"><span class="card-title">Appraisal & Review Schedule</span><button class="btn btn-ghost btn-sm" onclick="exportTbl('sched-tbl','schedule.csv')">Export CSV</button></div>
+    <div class="tbl-wrap"><table class="tbl" id="sched-tbl">
+      <thead><tr><th>ID</th><th>Name</th><th>Dept</th><th>Level</th><th>DoJ</th><th>Appraisals Done</th><th>Next Appraisal</th><th>Cycle Type</th><th>Level Review</th><th>Status</th></tr></thead>
+      <tbody id="sched-tbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ███ INCREMENT ███ -->
+<div id="s-increment" class="section">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('inc','calc')">Calculator</button>
+    <button class="tab" onclick="switchTab('inc','matrix')">Merit Matrix</button>
+  </div>
+  <div id="inc-calc" class="tab-pane active">
+    <div class="alert a-amber"><span>⚠</span><div>Proposals only. No salary changed until HR formally approves. Appraisal increment ≠ level change.</div></div>
+    <div class="g2">
+      <div class="card"><div class="card-head"><span class="card-title">Input</span></div><div class="card-body">
+        <div class="form-row r2">
+          <div class="fg"><label>Employee</label><select id="inc-emp" onchange="prefillIncrement()"><option value="">Select</option></select></div>
+          <div class="fg"><label>Monthly Gross (₹)</label><input type="number" id="inc-gross" oninput="calcIncrement()"/></div>
+        </div>
+        <div class="form-row r2">
+          <div class="fg"><label>Appraisal Band</label><select id="inc-band" onchange="calcIncrement()">
+            <option value="">Select</option>
+            <option value="exceptional">Exceptional</option><option value="strong">Strong</option>
+            <option value="meets">Meets Expectations</option><option value="below">Below Expectations</option>
+          </select></div>
+          <div class="fg"><label>Appraisal Score (reference)</label><input type="number" id="inc-score" placeholder="e.g. 84.5" oninput="suggestBand()"/></div>
+        </div>
+        <div class="form-row r2">
+          <div class="fg"><label>HR Override % (blank = use matrix)</label><input type="number" id="inc-override" oninput="calcIncrement()"/></div>
+          <div class="fg"><label>Override Reason</label><input type="text" id="inc-reason"/></div>
+        </div>
+        <button class="btn btn-primary" onclick="calcIncrement()">Calculate</button>
+      </div></div>
+      <div class="card"><div class="card-head"><span class="card-title">Breakdown</span></div><div class="card-body" id="inc-breakdown"><div style="color:var(--muted);font-size:12px">Select employee and band.</div></div></div>
+    </div>
+    <div class="card" id="inc-comp-card" style="display:none"><div class="card-head"><span class="card-title">Current vs Proposed</span><span class="hr-flag">⚠ Proposal</span></div><div class="card-body" id="inc-comp"></div></div>
+  </div>
+  <div id="inc-matrix" class="tab-pane">
+    <div class="alert a-accent"><span>ℹ</span><div>Super Admin and Admins can edit this matrix. These slabs determine merit increment percentages. For ₹70,000+ gross, monthly caps apply instead.</div></div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Merit Matrix (Fully Editable)</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-secondary btn-sm" onclick="addMatrixRow()">+ Add Slab</button>
+          <button class="btn btn-primary btn-sm" onclick="saveMatrix()">Save Matrix</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <table class="tbl" id="matrix-tbl"><thead><tr><th>Min Gross (₹)</th><th>Max Gross (₹)</th><th>Exceptional %</th><th>Strong %</th><th>Meets %</th><th></th></tr></thead>
+        <tbody id="matrix-tbody"></tbody></table>
+        <div style="margin-top:16px">
+          <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text)">₹70,000+ Monthly Increment Caps</div>
+          <div class="form-row r3">
+            <div class="fg"><label>Exceptional cap (₹/mo)</label><input type="number" id="cap-exc" value="5000"/></div>
+            <div class="fg"><label>Strong cap (₹/mo)</label><input type="number" id="cap-str" value="3500"/></div>
+            <div class="fg"><label>Meets cap (₹/mo)</label><input type="number" id="cap-mts" value="2100"/></div>
+          </div>
+        </div>
+        <div class="alert a-amber" style="margin-top:8px"><span>⚠</span><div>Below Expectations = 0% increment. Exception requires management approval and documentation.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ███ PAYROLL ███ -->
+<div id="s-payroll" class="section">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('pay','calc')">Calculator</button>
+    <button class="tab" onclick="switchTab('pay','statutory')">Statutory Config</button>
+    <button class="tab" onclick="switchTab('pay','history')">Records</button>
+  </div>
+  <div id="pay-calc" class="tab-pane active">
+    <div class="alert a-red"><span>⚠</span><div><strong>Legal flag:</strong> Statutory rates are illustrative. Verify PF, ESI, TDS with a qualified payroll professional before actual use.</div></div>
+    <div class="g2">
+      <div class="card"><div class="card-head"><span class="card-title">Employee & Period</span></div><div class="card-body">
+        <div class="form-row r2">
+          <div class="fg"><label>Employee</label><select id="pay-emp" onchange="prefillPayroll()"><option value="">Select</option></select></div>
+          <div class="fg"><label>Month</label><input type="month" id="pay-month"/></div>
+        </div>
+        <div class="form-row r3">
+          <div class="fg"><label>Monthly Gross (₹)</label><input type="number" id="pay-gross" oninput="calcPayroll()"/></div>
+          <div class="fg"><label>Basic % of Gross</label><input type="number" id="pay-basic-pct" value="50" oninput="calcPayroll()"/></div>
+          <div class="fg"><label>Basic (auto)</label><input type="number" id="pay-basic" readonly/></div>
+        </div>
+        <div class="form-row r3">
+          <div class="fg"><label>Voluntary PF (₹)</label><input type="number" id="pay-vpf" value="0" oninput="calcPayroll()"/></div>
+          <div class="fg"><label>OT Hours</label><input type="number" id="pay-ot-hrs" value="0" oninput="calcPayroll()"/></div>
+          <div class="fg"><label>OT Rate ₹/hr</label><input type="number" id="pay-ot-rate" value="0" oninput="calcPayroll()"/></div>
+        </div>
+        <div class="form-row r3">
+          <div class="fg"><label>Commission (₹)</label><input type="number" id="pay-comm" value="0" oninput="calcPayroll()"/></div>
+          <div class="fg"><label>Bonus (₹)</label><input type="number" id="pay-bonus" value="0" oninput="calcPayroll()"/></div>
+          <div class="fg"><label>Reimbursements (₹)</label><input type="number" id="pay-reimb" value="0" oninput="calcPayroll()"/></div>
+        </div>
+        <div class="form-row r3">
+          <div class="fg"><label>LOP Days</label><input type="number" id="pay-lop" value="0" oninput="calcPayroll()"/></div>
+          <div class="fg"><label>Leave Encashment Days</label><input type="number" id="pay-le-days" value="0" oninput="calcPayroll()"/></div>
+          <div class="fg"><label>Loan Recovery (₹)</label><input type="number" id="pay-loan" value="0" oninput="calcPayroll()"/></div>
+        </div>
+        <div class="form-row r2">
+          <div class="fg"><label>TDS (₹)</label><input type="number" id="pay-tds" value="0" oninput="calcPayroll()"/></div>
+          <div class="fg"><label>Other Deductions (₹)</label><input type="number" id="pay-other-ded" value="0" oninput="calcPayroll()"/></div>
+        </div>
+        <button class="btn btn-primary" onclick="calcPayroll()">Calculate</button>
+      </div></div>
+      <div>
+        <div class="card"><div class="card-head"><span class="card-title">Payslip Breakdown</span></div><div class="card-body" id="pay-breakdown"><div style="color:var(--muted);font-size:12px">Select employee and calculate.</div></div></div>
+        <div class="card" id="pay-comp-card" style="display:none"><div class="card-head"><span class="card-title">Comparison</span></div><div class="card-body" id="pay-comp"></div></div>
+      </div>
+    </div>
+  </div>
+  <div id="pay-statutory" class="tab-pane">
+    <div class="alert a-red"><span>⚠</span><div>Verify all rates with a qualified payroll professional. These are configurable defaults only.</div></div>
+    <div class="card"><div class="card-head"><span class="card-title">Statutory Configuration</span><button class="btn btn-secondary btn-sm" onclick="saveStatutory()">Save</button></div><div class="card-body">
+      <div class="form-row r3">
+        <div class="fg"><label>Employee PF %</label><input type="number" id="stat-empPF" value="12"/></div>
+        <div class="fg"><label>Employer PF %</label><input type="number" id="stat-erPF" value="12"/></div>
+        <div class="fg"><label>PF Wage Ceiling (₹)</label><input type="number" id="stat-pfCeiling" value="15000"/></div>
+      </div>
+      <div class="form-row r3">
+        <div class="fg"><label>PF Admin %</label><input type="number" id="stat-pfAdmin" value="0.5"/></div>
+        <div class="fg"><label>EDLI %</label><input type="number" id="stat-edli" value="0.5"/></div>
+        <div class="fg"><label>ESI Employee %</label><input type="number" id="stat-esiEmp" value="0.75"/></div>
+      </div>
+      <div class="form-row r3">
+        <div class="fg"><label>ESI Employer %</label><input type="number" id="stat-esiEr" value="3.25"/></div>
+        <div class="fg"><label>ESI Gross Ceiling (₹)</label><input type="number" id="stat-esiCeiling" value="21000"/></div>
+        <div class="fg"><label>PF Applicable (headcount ≥)</label><input type="number" id="stat-pfHC" value="20"/></div>
+      </div>
+      <div class="form-row r2">
+        <div class="fg"><label>ESI Applicable (headcount ≥)</label><input type="number" id="stat-esiHC" value="10"/></div>
+        <div class="fg"><label>Default Basic % of Gross</label><input type="number" id="stat-basicPct" value="50"/></div>
+      </div>
+    </div></div>
+  </div>
+  <div id="pay-history" class="tab-pane">
+    <div class="search-bar"><input type="text" id="pay-search" placeholder="Search…" oninput="renderPayHistory()"/><button class="btn btn-ghost" onclick="exportTbl('pay-tbl','payroll.csv')">Export CSV</button></div>
+    <div class="card"><div class="tbl-wrap"><table class="tbl" id="pay-tbl">
+      <thead><tr><th>Employee</th><th>Month</th><th>Gross</th><th>Emp PF</th><th>ESI</th><th>TDS</th><th>LOP</th><th>Net Pay</th><th>Er Cost</th></tr></thead>
+      <tbody id="pay-tbody"></tbody>
+    </table></div></div>
+  </div>
+</div>
+
+<!-- ███ LEAVE TRACKER ███ -->
+<div id="s-leave" class="section">
+  <div class="alert a-accent"><span>ℹ</span><div>HR enters actual leave taken per employee per year. This data feeds into the appraisal Section B (Leave Discipline). Edit any cell directly and click Save.</div></div>
+  <div class="search-bar">
+    <input type="text" id="leave-search" placeholder="Search employee…" oninput="renderLeaveTable()"/>
+    <select id="leave-year" onchange="renderLeaveTable()" style="max-width:130px">
+    </select>
+    <button class="btn btn-secondary btn-sm" onclick="openLeaveYearModal()" title="Add or remove financial years">Manage Years</button>
+    <button class="btn btn-ghost" onclick="exportTbl('leave-tbl','leave.csv')">Export CSV</button>
+  </div>
+  <div class="card"><div class="card-head"><span class="card-title">Leave Tracker — Editable</span><button class="btn btn-primary btn-sm" onclick="saveLeaveData()">Save Changes</button></div>
+    <div class="tbl-wrap"><table class="tbl" id="leave-tbl">
+      <thead><tr><th>Employee</th><th>Dept</th><th>EL Entitled</th><th>EL Taken</th><th>CL Taken</th><th>SL Taken</th><th>LOP Days</th><th>Unpaid Leave</th><th>Leave Balance</th><th>Notes</th></tr></thead>
+      <tbody id="leave-tbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ███ OPERATIONS ███ -->
+<div id="s-operations" class="section">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('ops','onboard')">Onboarding</button>
+    <button class="tab" onclick="switchTab('ops','probation')">Probation</button>
+    <button class="tab" onclick="switchTab('ops','exit')">Exit</button>
+    <button class="tab" onclick="switchTab('ops','docs')">Document Tracker</button>
+  </div>
+  <div id="ops-onboard" class="tab-pane active">
+    <div class="g2">
+      <div class="card"><div class="card-head"><span class="card-title">Onboarding Checklist</span></div><div class="card-body">
+        <div class="form-row r2"><div class="fg"><label>Employee</label><select id="ob-emp"><option value="">Select</option></select></div><div class="fg"><label>Joining Date</label><input type="date" id="ob-date"/></div></div>
+        <div id="ob-list"></div>
+      </div></div>
+      <div class="card"><div class="card-head"><span class="card-title">Probation Checklist</span></div><div class="card-body">
+        <div class="form-row r2"><div class="fg"><label>Employee</label><select id="prob-emp"><option value="">Select</option></select></div><div class="fg"><label>Review Date</label><input type="date" id="prob-date"/></div></div>
+        <div id="prob-list"></div>
+        <div class="form-row" style="margin-top:10px"><div class="fg"><label>Outcome</label><select id="prob-outcome"><option value="">Select (human decision required)</option><option>Confirmed</option><option>Extended 30 days</option><option>Not confirmed</option></select></div></div>
+      </div></div>
+    </div>
+  </div>
+  <div id="ops-probation" class="tab-pane">
+    <div class="card"><div class="card-head"><span class="card-title">Employees on Probation</span></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Employee</th><th>Dept</th><th>DoJ</th><th>Probation Ends</th><th>Status</th><th></th></tr></thead><tbody id="prob-tbody"></tbody></table></div>
+    </div>
+  </div>
+  <div id="ops-exit" class="tab-pane">
+    <div class="g2">
+      <div class="card"><div class="card-head"><span class="card-title">Exit Checklist</span></div><div class="card-body">
+        <div class="form-row r3"><div class="fg"><label>Employee</label><select id="exit-emp"><option>Select</option></select></div><div class="fg"><label>Last Working Day</label><input type="date" id="exit-lwd"/></div><div class="fg"><label>Reason</label><select id="exit-reason"><option>Resignation</option><option>Termination</option><option>Retirement</option><option>Mutual Separation</option></select></div></div>
+        <div id="exit-list"></div>
+      </div></div>
+      <div class="card"><div class="card-head"><span class="card-title">Exit Interview Notes</span></div><div class="card-body">
+        <div class="form-row"><div class="fg"><label>Date</label><input type="date" id="exit-int-date"/></div></div>
+        <div class="form-row"><div class="fg"><label>Reasons Shared</label><textarea id="exit-reasons" placeholder="Employee's reasons for leaving…"></textarea></div></div>
+        <div class="form-row"><div class="fg"><label>HR Notes (internal)</label><textarea id="exit-hr-notes"></textarea></div></div>
+        <div class="alert a-red" style="margin-top:8px"><span>⚠</span><div>Full & final settlement requires Accounts. Verify notice period, gratuity, leave encashment per Indian labour law.</div></div>
+      </div></div>
+    </div>
+  </div>
+  <div id="ops-docs" class="tab-pane">
+    <div class="card"><div class="card-head"><span class="card-title">Document Tracker</span><button class="btn btn-ghost btn-sm" onclick="exportTbl('docs-tbl','docs.csv')">Export CSV</button></div>
+      <div class="tbl-wrap"><table class="tbl" id="docs-tbl"><thead><tr><th>Employee</th><th>Offer</th><th>PAN</th><th>Aadhaar</th><th>Bank</th><th>PF Form</th><th>Qualification</th><th>Photo ID</th><th>Policies</th></tr></thead><tbody id="docs-tbody"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ███ ADMIN ███ -->
+<div id="s-admin" class="section">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('adm','users')">Users & Roles</button>
+    <button class="tab" onclick="switchTab('adm','perms')">Role Permissions</button>
+    <button class="tab" onclick="switchTab('adm','mgr-access')">Manager Access</button>
+    <button class="tab" onclick="switchTab('adm','share')">Share Access Links</button>
+  </div>
+  <div id="adm-users" class="tab-pane active">
+    <div class="alert a-amber"><span>⚠</span><div>Credentials stored in browser session only. Not secure for production — use server-side auth with hashed passwords in a real deployment.</div></div>
+    <div class="search-bar"><button class="btn btn-primary" onclick="openUserModal()">+ Add User</button></div>
+    <div class="card"><div class="tbl-wrap"><table class="tbl" id="users-tbl">
+      <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Dept</th><th>Linked Employee</th><th>Status</th><th></th></tr></thead>
+      <tbody id="users-tbody"></tbody>
+    </table></div></div>
+  </div>
+  <div id="adm-perms" class="tab-pane"><div id="role-perms-body"></div></div>
+  <div id="adm-share" class="tab-pane">
+    <div class="alert a-accent"><span>ℹ</span><div>Generate a shareable access link for any user. The link contains their login credentials pre-filled. <strong>This is a browser prototype only</strong> — in production, share credentials securely via email or your internal comms tool, never via public link.</div></div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Share Access with a User</span></div>
+      <div class="card-body">
+        <div class="form-row r3">
+          <div class="fg"><label>Select User to Share With</label><select id="share-user" onchange="generateShareInfo()"><option value="">Select user</option></select></div>
+          <div class="fg"><label>What they can access (role-based)</label><input type="text" id="share-role-display" readonly placeholder="Determined by role"/></div>
+          <div class="fg"><label>Share Method</label><select id="share-method"><option value="creds">Show credentials to copy</option><option value="link">Show login URL</option></select></div>
+        </div>
+        <button class="btn btn-primary" onclick="generateShareInfo()">Generate Share Info</button>
+        <div id="share-output" style="display:none;margin-top:14px">
+          <div class="breakdown">
+            <div class="br-row"><span class="br-label">Username</span><span class="br-val" id="share-username-out" style="color:var(--teal)"></span></div>
+            <div class="br-row"><span class="br-label">Password</span><span class="br-val" id="share-pass-out" style="color:var(--teal)"></span></div>
+            <div class="br-row"><span class="br-label">Role & Access</span><span class="br-val" id="share-access-out"></span></div>
+            <div class="br-row"><span class="br-label">Can View</span><span class="br-val" id="share-can-view" style="font-size:11px;color:var(--muted)"></span></div>
+            <div class="br-row"><span class="br-label">Cannot Access</span><span class="br-val" id="share-cannot" style="font-size:11px;color:var(--red)"></span></div>
+          </div>
+          <div class="alert a-amber" style="margin-top:10px"><span>⚠</span><div>Share credentials securely — through your encrypted internal comms tool, not via WhatsApp or public email. In production, use email-based magic links or SSO instead of password sharing.</div></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="copyShareInfo()">Copy Credentials</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Active Users & Their Access Summary</span></div>
+      <div class="tbl-wrap"><table class="tbl" id="share-summary-tbl">
+        <thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Dept</th><th>Modules Accessible</th><th>Key Restrictions</th></tr></thead>
+        <tbody id="share-summary-tbody"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div id="adm-mgr-access" class="tab-pane">
+    <div class="alert a-accent"><span>ℹ</span><div>Grant managers access to employees or departments outside their team. By default, managers see only direct reports.</div></div>
+    <div class="card"><div class="card-head"><span class="card-title">Manager Access Grants</span><button class="btn btn-primary btn-sm" onclick="openMgrModal()">+ Grant Access</button></div>
+      <div class="tbl-wrap"><table class="tbl" id="mgr-tbl"><thead><tr><th>Manager</th><th>Access To</th><th>Type</th><th>Granted By</th><th></th></tr></thead><tbody id="mgr-tbody"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ███ REMINDERS ███ -->
+<div id="s-reminders" class="section">
+  <div class="search-bar"><button class="btn btn-primary" onclick="openReminderModal()">+ Add Reminder</button><button class="btn btn-ghost" onclick="exportTbl('rem-tbl','reminders.csv')">Export CSV</button></div>
+  <div class="card"><div class="tbl-wrap"><table class="tbl" id="rem-tbl">
+    <thead><tr><th>Title</th><th>Employee</th><th>Due</th><th>Type</th><th>Priority</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+    <tbody id="rem-tbody"></tbody>
+  </table></div></div>
+</div>
+
+<!-- ███ SETTINGS ███ -->
+<div id="s-settings" class="section">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('set','account')">My Account</button>
+    <button class="tab" onclick="switchTab('set','superadmin')">Super Admin Config</button>
+    <button class="tab" onclick="switchTab('set','integration')">OS Integration</button>
+    <button class="tab" onclick="switchTab('set','data')">Data & Storage</button>
+  </div>
+
+  <!-- MY ACCOUNT -->
+  <div id="set-account" class="tab-pane active">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Change My Password</span></div>
+      <div class="card-body">
+        <div class="form-row r3">
+          <div class="fg"><label>Current Password</label><input type="password" id="acc-cur-pass" placeholder="Current password"/></div>
+          <div class="fg"><label>New Password</label><input type="password" id="acc-new-pass" placeholder="Min 6 characters"/></div>
+          <div class="fg"><label>Confirm New Password</label><input type="password" id="acc-conf-pass" placeholder="Repeat new password"/></div>
+        </div>
+        <button class="btn btn-primary" onclick="changeMyPassword()">Change Password</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Change My Display Name</span></div>
+      <div class="card-body">
+        <div class="form-row r2">
+          <div class="fg"><label>Display Name</label><input type="text" id="acc-name" placeholder="Your name"/></div>
+          <div class="fg" style="align-self:end"><button class="btn btn-primary" onclick="changeMyName()">Save Name</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPER ADMIN CONFIG -->
+  <div id="set-superadmin" class="tab-pane">
+    <div class="alert a-red"><span>⚠</span><div><strong>Super Admin only.</strong> Changing the Super Admin credentials here replaces the root account for this session. In a production deployment these credentials must be stored in a secure server-side environment — never in client-side code.</div></div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Super Admin Account Settings</span></div>
+      <div class="card-body">
+        <div class="form-row r2">
+          <div class="fg"><label>Super Admin Display Name</label><input type="text" id="sa-name" placeholder="e.g. Kavita Patel"/></div>
+          <div class="fg"><label>Super Admin Username</label><input type="text" id="sa-username" placeholder="e.g. superadmin"/></div>
+        </div>
+        <div class="form-row r2">
+          <div class="fg"><label>New Password (leave blank to keep current)</label><input type="password" id="sa-pass" placeholder="New password (min 6 chars)"/></div>
+          <div class="fg"><label>Confirm New Password</label><input type="password" id="sa-pass2" placeholder="Repeat"/></div>
+        </div>
+        <button class="btn btn-primary" onclick="saveSuperAdminSettings()">Save Super Admin Settings</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">System Branding</span></div>
+      <div class="card-body">
+        <div class="form-row r2">
+          <div class="fg"><label>Company Name (shown in brand bar)</label><input type="text" id="brand-company" placeholder="Apexure India Pvt. Ltd."/></div>
+          <div class="fg"><label>System Title</label><input type="text" id="brand-title" placeholder="HRMS"/></div>
+        </div>
+        <button class="btn btn-primary" onclick="saveBranding()">Save Branding</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OS INTEGRATION -->
+  <div id="set-integration" class="tab-pane">
+    <div class="alert a-accent"><span>ℹ</span><div>This section explains how to connect Apexure HRMS to your other operating systems. All integrations require a backend server. The current build is a browser prototype — no live connections exist.</div></div>
+
+    <div class="card">
+      <div class="card-head"><span class="card-title">Integration Options — How to Connect</span></div>
+      <div class="card-body">
+        <table class="tbl">
+          <thead><tr><th>System</th><th>Integration Method</th><th>What It Enables</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Google Workspace</strong></td><td>Google OAuth 2.0 + Sheets API</td><td>SSO login, employee data sync to Google Sheets, calendar reminders</td><td><span class="badge b-amber">Not connected</span></td></tr>
+            <tr><td><strong>Slack</strong></td><td>Slack Webhook / Bot API</td><td>Appraisal reminders, leave approvals, level review alerts sent to Slack channels</td><td><span class="badge b-amber">Not connected</span></td></tr>
+            <tr><td><strong>GreytHR / Zoho Payroll</strong></td><td>REST API + CSV export</td><td>Push approved salary structures, sync payroll-processed records</td><td><span class="badge b-amber">Not connected</span></td></tr>
+            <tr><td><strong>Tally / Zoho Books</strong></td><td>CSV import / API</td><td>Export payroll cost entries for accounting</td><td><span class="badge b-amber">Not connected</span></td></tr>
+            <tr><td><strong>Custom HR App / Website</strong></td><td>REST API (Node / Python backend)</td><td>Employee self-service portal — view payslips, apply leave, view appraisal scores</td><td><span class="badge b-amber">Not connected</span></td></tr>
+            <tr><td><strong>Email (SMTP)</strong></td><td>SendGrid / AWS SES / Nodemailer</td><td>Send reminders, offer letters, appraisal notifications directly from HRMS</td><td><span class="badge b-amber">Not connected</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="card-title">How to Make This a Full Production App</span></div>
+      <div class="card-body">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="padding:12px;background:var(--surface2);border-radius:var(--r);border-left:3px solid var(--accent)">
+            <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">Step 1 — Backend server</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.7">Deploy a Node.js (Express) or Python (FastAPI) server. Move all DB.employees, DB.appraisals, and DB.leaveData objects into a PostgreSQL or Supabase database. Every form Save button calls an API instead of writing to the JS object.</div>
+          </div>
+          <div style="padding:12px;background:var(--surface2);border-radius:var(--r);border-left:3px solid var(--purple)">
+            <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">Step 2 — Authentication</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.7">Replace the browser login with Supabase Auth, Auth0, or Firebase Auth. Each user gets a JWT token. Row-level security in the database enforces what each role can read or write — not just the UI.</div>
+          </div>
+          <div style="padding:12px;background:var(--surface2);border-radius:var(--r);border-left:3px solid var(--green)">
+            <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">Step 3 — Connect your existing OS</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.7">Add API endpoints that call GreytHR's REST API for payroll sync, Google Sheets API for reporting, and Slack Webhooks for notifications. The frontend HTML stays identical — only the fetch() calls in JS change from writing to DB.* to calling your server endpoints.</div>
+          </div>
+          <div style="padding:12px;background:var(--surface2);border-radius:var(--r);border-left:3px solid var(--amber)">
+            <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">Step 4 — Employee self-service</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.7">Create a separate employee-facing page (same design system) where staff log in with their own credentials, view their payslip, leave balance, and appraisal score — but cannot edit any HR record.</div>
+          </div>
+          <div style="padding:12px;background:var(--surface2);border-radius:var(--r);border-left:3px solid var(--teal)">
+            <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">Step 5 — Audit log</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.7">Every write to employee records, appraisals, and payroll inserts a row into an audit_log table: who changed what, when, previous value, new value. This is required for salary governance and compliance.</div>
+          </div>
+        </div>
+        <div class="alert a-amber" style="margin-top:14px"><span>⚠</span><div>The HTML file you have right now is the complete frontend. A developer can wire it to a Supabase backend in 2–3 days. The UI, logic, and calculations stay exactly as-is.</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="card-title">Export Current Data (CSV)</span></div>
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Export your current session data as CSV files to import into GreytHR, Google Sheets, or your payroll system.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="exportTbl('emp-tbl','employees.csv')">Export Employees</button>
+          <button class="btn btn-secondary" onclick="exportTbl('apr-tbl','appraisals.csv')">Export Appraisals</button>
+          <button class="btn btn-secondary" onclick="exportTbl('pay-tbl','payroll.csv')">Export Payroll</button>
+          <button class="btn btn-secondary" onclick="exportTbl('leave-tbl','leave.csv')">Export Leave</button>
+          <button class="btn btn-secondary" onclick="exportTbl('lch-tbl','level_history.csv')">Export Level History</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA & STORAGE -->
+  <div id="set-data" class="tab-pane">
+    <div class="alert a-red"><span>⚠</span><div><strong>Important:</strong> All data in this prototype is stored in browser session memory. It is permanently lost when you close the tab or refresh. No data is sent to any server. Do not enter real employee personal data, salary figures, or PAN/Aadhaar numbers into this prototype.</div></div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Current Session Data Summary</span></div>
+      <div class="card-body" id="data-summary"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Financial Year Management</span></div>
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Add or remove financial years available in the Leave Tracker and other year-based modules.</p>
+        <div id="fy-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" id="new-fy" placeholder="e.g. 2025-26" style="max-width:140px"/>
+          <button class="btn btn-primary btn-sm" onclick="addFY()">+ Add Year</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div><!-- content -->
+</div><!-- main -->
+</div><!-- app -->
+
+<!-- MODALS -->
+<div id="emp-modal" class="overlay" style="display:none">
+  <div class="modal"><div class="modal-head"><span style="font-size:14px;font-weight:600" id="emp-modal-title">Add Employee</span><button class="btn btn-ghost btn-sm" onclick="closeModal('emp-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row r2"><div class="fg"><label>Employee ID</label><input type="text" id="m-id"/></div><div class="fg"><label>Full Name</label><input type="text" id="m-name"/></div></div>
+      <div class="form-row r2"><div class="fg"><label>Designation</label><input type="text" id="m-desig"/></div><div class="fg"><label>Department</label><select id="m-dept" onchange="populateLevelSelect()"></select></div></div>
+      <div class="form-row r3">
+        <div class="fg"><label>Career Level</label><select id="m-level"></select></div>
+        <div class="fg"><label>Date of Joining</label><input type="date" id="m-doj"/></div>
+        <div class="fg"><label>Status</label><select id="m-status"><option>Active</option><option>Probation</option><option>On Leave</option><option>Resigned</option><option>Terminated</option></select></div>
+      </div>
+      <div class="form-row r3"><div class="fg"><label>Monthly Gross (₹)</label><input type="number" id="m-gross"/></div><div class="fg"><label>Basic (₹)</label><input type="number" id="m-basic"/></div><div class="fg"><label>Annual CTC (₹)</label><input type="number" id="m-ctc"/></div></div>
+      <div class="form-row r2"><div class="fg"><label>Reporting Manager</label><input type="text" id="m-manager"/></div><div class="fg"><label>Work Email</label><input type="email" id="m-email"/></div></div>
+      <div class="form-row r2"><div class="fg"><label>Level Entry Date</label><input type="date" id="m-level-date" title="Date employee entered current level"/></div><div class="fg"><label>Appraisals Done</label><input type="number" id="m-apr-done" value="0"/></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="closeModal('emp-modal')">Cancel</button><button class="btn btn-primary" onclick="saveEmployee()">Save</button></div>
+  </div>
+</div>
+
+<div id="user-modal" class="overlay" style="display:none">
+  <div class="modal"><div class="modal-head"><span style="font-size:14px;font-weight:600" id="user-modal-title">Add User</span><button class="btn btn-ghost btn-sm" onclick="closeModal('user-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row r2"><div class="fg"><label>Username</label><input type="text" id="mu-user"/></div><div class="fg"><label>Display Name</label><input type="text" id="mu-name"/></div></div>
+      <div class="form-row r2"><div class="fg"><label>Password</label><input type="password" id="mu-pass"/></div><div class="fg"><label>Role</label><select id="mu-role"><option value="admin">Admin</option><option value="manager">Manager</option><option value="reviewer">Reviewer</option></select></div></div>
+      <div class="form-row r2"><div class="fg"><label>Department</label><select id="mu-dept"></select></div><div class="fg"><label>Linked Employee</label><select id="mu-emp"><option value="">None</option></select></div></div>
+      <div class="fg"><label>Status</label><select id="mu-status"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="closeModal('user-modal')">Cancel</button><button class="btn btn-primary" onclick="saveUser()">Save</button></div>
+  </div>
+</div>
+
+<div id="reminder-modal" class="overlay" style="display:none">
+  <div class="modal"><div class="modal-head"><span style="font-size:14px;font-weight:600">Add Reminder</span><button class="btn btn-ghost btn-sm" onclick="closeModal('reminder-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row r2"><div class="fg"><label>Title</label><input type="text" id="rm-title"/></div><div class="fg"><label>Employee (optional)</label><select id="rm-emp"><option value="">Not specific</option></select></div></div>
+      <div class="form-row r3"><div class="fg"><label>Due Date</label><input type="date" id="rm-date"/></div><div class="fg"><label>Type</label><select id="rm-type"><option>Appraisal</option><option>Level Review</option><option>Increment</option><option>Probation</option><option>Document</option><option>Payroll</option><option>General</option></select></div><div class="fg"><label>Priority</label><select id="rm-pri"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div></div>
+      <div class="fg"><label>Notes</label><textarea id="rm-notes"></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="closeModal('reminder-modal')">Cancel</button><button class="btn btn-primary" onclick="saveReminder()">Save</button></div>
+  </div>
+</div>
+
+<div id="mgr-modal" class="overlay" style="display:none">
+  <div class="modal"><div class="modal-head"><span style="font-size:14px;font-weight:600">Grant Manager Access</span><button class="btn btn-ghost btn-sm" onclick="closeModal('mgr-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row r2"><div class="fg"><label>Manager</label><select id="ma-mgr"></select></div><div class="fg"><label>Access Type</label><select id="ma-type"><option value="department">Department</option><option value="employee">Specific Employee</option><option value="all">All Teams</option></select></div></div>
+      <div class="form-row r2"><div class="fg"><label>Department (if dept)</label><select id="ma-dept"><option value="">All</option></select></div><div class="fg"><label>Employee (if specific)</label><select id="ma-emp"><option value="">Not specific</option></select></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="closeModal('mgr-modal')">Cancel</button><button class="btn btn-primary" onclick="saveMgrAccess()">Grant</button></div>
+  </div>
+</div>
+
+<!-- DEPT MODAL -->
+<div id="dept-modal" class="overlay" style="display:none">
+  <div class="modal"><div class="modal-head"><span style="font-size:14px;font-weight:600" id="dept-modal-title">Add Department</span><button class="btn btn-ghost btn-sm" onclick="closeModal('dept-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row r2">
+        <div class="fg"><label>Department Name</label><input type="text" id="dm-name" placeholder="e.g. Product Design"/></div>
+        <div class="fg"><label>Rename From (leave blank if new)</label><input type="text" id="dm-old-name" placeholder="Current name if renaming"/></div>
+      </div>
+      <div class="fg" style="margin-bottom:12px"><label>Description (optional)</label><input type="text" id="dm-desc" placeholder="What this department does"/></div>
+      <div class="alert a-amber"><span>⚠</span><div>Adding a department creates a default 3-level career ladder and KPI template that you can customise. Renaming updates all employee records automatically. Removing is only allowed when no active employees belong to it.</div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="closeModal('dept-modal')">Cancel</button><button class="btn btn-primary" onclick="saveDept()">Save Department</button></div>
+  </div>
+</div>
+
+<!-- LEAVE YEAR MODAL -->
+<div id="leave-year-modal" class="overlay" style="display:none">
+  <div class="modal" style="max-width:420px"><div class="modal-head"><span style="font-size:14px;font-weight:600">Manage Financial Years</span><button class="btn btn-ghost btn-sm" onclick="closeModal('leave-year-modal')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Add or remove financial years available in the Leave Tracker. Format: YYYY-YY (e.g. 2025-26).</p>
+      <div id="leave-year-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="new-leave-year" placeholder="e.g. 2025-26" style="flex:1"/>
+        <button class="btn btn-primary btn-sm" onclick="addLeaveYear()">+ Add</button>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="closeModal('leave-year-modal');renderLeaveTable()">Done</button></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════
+// AUTH
+// ════════════════════════════════════
+const ROLE_CLR={superadmin:'#4F6EF7',admin:'#8B5CF6',manager:'#06B6D4',reviewer:'#F6A823'};
+const ROLE_LBL={superadmin:'Super Admin',admin:'Admin',manager:'Manager',reviewer:'Reviewer'};
+
+const AUTH={
+  users:[
+    {username:'superadmin',password:'admin123',name:'Kavita Patel',role:'superadmin',dept:'All',empId:null,status:'active'},
+    {username:'admin1',password:'admin123',name:'Meena Krishnan',role:'admin',dept:'All',empId:'APX-009',status:'active'},
+    {username:'admin2',password:'admin123',name:'Rajesh Verma',role:'admin',dept:'HR',empId:null,status:'active'},
+    {username:'manager1',password:'mgr123',name:'Arjun Nair',role:'manager',dept:'Web Development',empId:'APX-006',status:'active'},
+    {username:'manager2',password:'mgr123',name:'Sneha Iyer',role:'manager',dept:'Client Accounts',empId:'APX-007',status:'active'},
+    {username:'reviewer1',password:'rev123',name:'Dev Kapoor',role:'reviewer',dept:'Digital Marketing',empId:'APX-002',status:'active'},
+  ],
+  current:null
+};
+
+let PERMS={
+  superadmin:{dashboard:1,employees:1,career:1,appraisal:1,levelreview:1,schedule:1,increment:1,payroll:1,leave:1,operations:1,admin:1,settings:1,reminders:1,editEmployee:1,viewSalary:1,editAppraisal:1,finaliseAppraisal:1,editMatrix:1,editWeights:1,viewAllEmployees:1,editLeave:1,recordLevelChange:1},
+  admin:{dashboard:1,employees:1,career:1,appraisal:1,levelreview:1,schedule:1,increment:1,payroll:1,leave:1,operations:1,admin:0,settings:1,reminders:1,editEmployee:1,viewSalary:1,editAppraisal:1,finaliseAppraisal:1,editMatrix:0,editWeights:0,viewAllEmployees:1,editLeave:1,recordLevelChange:1},
+  manager:{dashboard:1,employees:1,career:0,appraisal:1,levelreview:1,schedule:1,increment:0,payroll:0,leave:1,operations:1,admin:0,settings:1,reminders:1,editEmployee:0,viewSalary:0,editAppraisal:1,finaliseAppraisal:0,editMatrix:0,editWeights:0,viewAllEmployees:0,editLeave:0,recordLevelChange:0},
+  reviewer:{dashboard:1,employees:1,career:0,appraisal:0,levelreview:0,schedule:1,increment:0,payroll:0,leave:0,operations:0,admin:0,settings:1,reminders:0,editEmployee:0,viewSalary:0,editAppraisal:0,finaliseAppraisal:0,editMatrix:0,editWeights:0,viewAllEmployees:0,editLeave:0,recordLevelChange:0},
+};
+
+let MGR_ACCESS=[];
+
+function me(){return AUTH.current;}
+function can(p){if(!me())return 0;if(me().role==='superadmin')return 1;return PERMS[me().role]?.[p]||0;}
+function isSA(){return me()&&me().role==='superadmin';}
 
 function doLogin(){
-  const u = document.getElementById('login-user').value;
-  const p = document.getElementById('login-pass').value;
-  if(u === 'superadmin' && p === 'admin123') {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-root').style.display = 'flex';
-  } else {
-    document.getElementById('login-err').style.display = 'block';
-  }
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value;
+  const user=AUTH.users.find(x=>x.username===u&&x.password===p&&x.status==='active');
+  if(!user){document.getElementById('login-err').style.display='block';return;}
+  AUTH.current=user;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-root').style.display='flex';
+  applyCtx();
+  autoPopDeptFilters();
+  autoReminders();
+  populateLeaveYearDropdown();
+  renderDashboard();
+  document.getElementById('pay-month').value=new Date().toISOString().slice(0,7);
+  populateAllSelects();
+}
+function doLogout(){AUTH.current=null;document.getElementById('login-screen').style.display='flex';document.getElementById('app-root').style.display='none';document.getElementById('login-user').value='';document.getElementById('login-pass').value='';document.getElementById('login-err').style.display='none';}
+
+function applyCtx(){
+  const u=me();if(!u)return;
+  document.getElementById('user-display-name').textContent=u.name;
+  document.getElementById('user-display-role').textContent=ROLE_LBL[u.role];
+  document.getElementById('topbar-role').textContent=ROLE_LBL[u.role];
+  document.getElementById('brand-sub').textContent='v3 · '+ROLE_LBL[u.role];
+  const av=document.getElementById('user-avatar');
+  av.textContent=u.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  av.style.background=ROLE_CLR[u.role]||'var(--accent)';
+  const navMap={dashboard:'nav-dashboard',employees:'nav-employees',career:'nav-career',appraisal:'nav-appraisal',levelreview:'nav-levelreview',schedule:'nav-schedule',increment:'nav-increment',payroll:'nav-payroll',leave:'nav-leave',operations:'nav-operations',admin:'nav-admin',settings:'nav-settings',reminders:'nav-reminders'};
+  Object.entries(navMap).forEach(([sec,id])=>{const el=document.getElementById(id);if(el)el.style.display=can(sec)?'':'none';});
 }
 
-function doLogout(){
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app-root').style.display = 'none';
+// ════════════════════════════════════
+// DB
+// ════════════════════════════════════
+
+// DEPT-SPECIFIC CAREER LADDERS
+const DB={
+  employees:[
+    {id:'APX-001',name:'Riya Sharma',desig:'Sr. Web Developer',dept:'Web Development',levelIdx:3,doj:'2021-03-15',levelDate:'2022-06-01',status:'Active',gross:52000,basic:26000,ctc:680000,manager:'Arjun Nair',email:'riya@apexure.in',appraisalsDone:3,docs:{offer:true,pan:true,aadhaar:true,bank:true,pf:true,qual:true,photo:true,policies:true}},
+    {id:'APX-002',name:'Dev Kapoor',desig:'Digital Marketing Manager',dept:'Digital Marketing',levelIdx:3,doj:'2020-07-01',levelDate:'2022-01-01',status:'Active',gross:58000,basic:29000,ctc:756000,manager:'Priya Mehta',email:'dev@apexure.in',appraisalsDone:4,docs:{offer:true,pan:true,aadhaar:true,bank:true,pf:true,qual:false,photo:true,policies:true}},
+    {id:'APX-003',name:'Anjali Rao',desig:'Client Account Executive',dept:'Client Accounts',levelIdx:1,doj:'2023-01-10',levelDate:'2023-01-10',status:'Active',gross:28000,basic:14000,ctc:364000,manager:'Sneha Iyer',email:'anjali@apexure.in',appraisalsDone:1,docs:{offer:true,pan:true,aadhaar:false,bank:true,pf:false,qual:true,photo:true,policies:true}},
+    {id:'APX-004',name:'Kabir Mehta',desig:'UI/UX Designer',dept:'Design',levelIdx:2,doj:'2022-09-05',levelDate:'2022-09-05',status:'Active',gross:38000,basic:19000,ctc:494000,manager:'Riya Sharma',email:'kabir@apexure.in',appraisalsDone:2,docs:{offer:true,pan:true,aadhaar:true,bank:true,pf:true,qual:true,photo:false,policies:true}},
+    {id:'APX-005',name:'Pooja Verma',desig:'Junior Web Developer',dept:'Web Development',levelIdx:0,doj:'2024-04-01',levelDate:'2024-04-01',status:'Probation',gross:22000,basic:11000,ctc:286000,manager:'Riya Sharma',email:'pooja@apexure.in',appraisalsDone:0,docs:{offer:true,pan:false,aadhaar:false,bank:true,pf:false,qual:false,photo:true,policies:false}},
+    {id:'APX-006',name:'Arjun Nair',desig:'Head of Technology',dept:'Web Development',levelIdx:5,doj:'2019-06-01',levelDate:'2022-06-01',status:'Active',gross:95000,basic:47500,ctc:1254000,manager:'CEO',email:'arjun@apexure.in',appraisalsDone:5,docs:{offer:true,pan:true,aadhaar:true,bank:true,pf:true,qual:true,photo:true,policies:true}},
+    {id:'APX-007',name:'Sneha Iyer',desig:'Senior Account Manager',dept:'Client Accounts',levelIdx:4,doj:'2020-02-14',levelDate:'2022-08-14',status:'Active',gross:65000,basic:32500,ctc:858000,manager:'CEO',email:'sneha@apexure.in',appraisalsDone:4,docs:{offer:true,pan:true,aadhaar:true,bank:true,pf:true,qual:true,photo:true,policies:true}},
+    {id:'APX-008',name:'Rohan Das',desig:'SEO Specialist',dept:'Digital Marketing',levelIdx:1,doj:'2023-08-21',levelDate:'2023-08-21',status:'Active',gross:26000,basic:13000,ctc:338000,manager:'Dev Kapoor',email:'rohan@apexure.in',appraisalsDone:1,docs:{offer:true,pan:true,aadhaar:true,bank:false,pf:false,qual:true,photo:true,policies:true}},
+    {id:'APX-009',name:'Meena Krishnan',desig:'HR Executive',dept:'HR',levelIdx:2,doj:'2022-01-03',levelDate:'2022-01-03',status:'Active',gross:32000,basic:16000,ctc:416000,manager:'CEO',email:'meena@apexure.in',appraisalsDone:2,docs:{offer:true,pan:true,aadhaar:true,bank:true,pf:true,qual:true,photo:true,policies:true}},
+    {id:'APX-010',name:'Vishal Gupta',desig:'Strategy Analyst',dept:'Strategy',levelIdx:2,doj:'2022-11-15',levelDate:'2022-11-15',status:'Active',gross:40000,basic:20000,ctc:520000,manager:'CEO',email:'vishal@apexure.in',appraisalsDone:2,docs:{offer:true,pan:true,aadhaar:true,bank:true,pf:true,qual:true,photo:true,policies:true}},
+  ],
+
+  // DEPARTMENT-SPECIFIC CAREER LADDERS
+  ladders:{
+    'Web Development':{
+      levels:[
+        {name:'Junior Developer',salaryMin:18000,salaryMax:25000,incRef:{exceptional:25,strong:18,meets:12},desc:'Entry-level developer under guidance. Builds features with supervision.'},
+        {name:'Developer',salaryMin:25000,salaryMax:35000,incRef:{exceptional:22,strong:16,meets:10},desc:'Independently handles features. Reviews code. Basic problem-solving.'},
+        {name:'Senior Developer',salaryMin:35000,salaryMax:55000,incRef:{exceptional:18,strong:14,meets:9},desc:'Leads modules, mentors juniors. Owns technical decisions on a project.'},
+        {name:'Tech Lead',salaryMin:55000,salaryMax:80000,incRef:{exceptional:15,strong:11,meets:7},desc:'Cross-team technical leadership. Architecture decisions. Client-facing.'},
+        {name:'Engineering Manager',salaryMin:80000,salaryMax:120000,incRef:{exceptional:12,strong:8,meets:5},desc:'Manages a dev team. Owns delivery outcomes. Hiring and performance.'},
+        {name:'Head of Technology',salaryMin:120000,salaryMax:200000,incRef:{exceptional:10,strong:7,meets:4},desc:'Department head. Technology strategy. C-suite reporting.'},
+      ]
+    },
+    'Digital Marketing':{
+      levels:[
+        {name:'Marketing Executive',salaryMin:18000,salaryMax:25000,incRef:{exceptional:25,strong:18,meets:12},desc:'Executes campaigns. Manages day-to-day content and reporting.'},
+        {name:'Marketing Specialist',salaryMin:25000,salaryMax:35000,incRef:{exceptional:22,strong:16,meets:10},desc:'Owns specific channels. Runs independent campaigns. Analysis.'},
+        {name:'Senior Specialist',salaryMin:35000,salaryMax:50000,incRef:{exceptional:18,strong:14,meets:9},desc:'Strategy across channels. Client-facing insights. Mentors juniors.'},
+        {name:'Marketing Lead',salaryMin:50000,salaryMax:70000,incRef:{exceptional:15,strong:11,meets:7},desc:'Leads a team or key account. Campaign ownership end-to-end.'},
+        {name:'Marketing Manager',salaryMin:70000,salaryMax:110000,incRef:{exceptional:12,strong:8,meets:5},desc:'Manages the marketing team. Budget ownership. Stakeholder mgmt.'},
+        {name:'Head of Marketing',salaryMin:110000,salaryMax:180000,incRef:{exceptional:10,strong:7,meets:4},desc:'Department head. Growth strategy. C-suite accountability.'},
+      ]
+    },
+    'Client Accounts':{
+      levels:[
+        {name:'Account Executive',salaryMin:18000,salaryMax:26000,incRef:{exceptional:25,strong:18,meets:12},desc:'Handles day-to-day client communications and task co-ordination.'},
+        {name:'Account Manager',salaryMin:26000,salaryMax:38000,incRef:{exceptional:22,strong:16,meets:10},desc:'Manages small account portfolios. Owns deliverables and timelines.'},
+        {name:'Senior Account Manager',salaryMin:38000,salaryMax:58000,incRef:{exceptional:18,strong:14,meets:9},desc:'Manages key/large accounts. Upsell responsibility. Client NPS.'},
+        {name:'Account Director',salaryMin:58000,salaryMax:80000,incRef:{exceptional:15,strong:11,meets:7},desc:'Multi-account ownership. Revenue targets. Cross-team liaison.'},
+        {name:'Group Account Director',salaryMin:80000,salaryMax:120000,incRef:{exceptional:12,strong:8,meets:5},desc:'Senior client relationships. P&L responsibility. Team management.'},
+        {name:'Head of Client Services',salaryMin:120000,salaryMax:180000,incRef:{exceptional:10,strong:7,meets:4},desc:'Department head. Client strategy. New business input.'},
+      ]
+    },
+    'Design':{
+      levels:[
+        {name:'Junior Designer',salaryMin:18000,salaryMax:26000,incRef:{exceptional:25,strong:18,meets:12},desc:'Executes design tasks under guidance. Learns brand and tools.'},
+        {name:'Designer',salaryMin:26000,salaryMax:38000,incRef:{exceptional:22,strong:16,meets:10},desc:'Independently delivers design across projects. Strong craft.'},
+        {name:'Senior Designer',salaryMin:38000,salaryMax:58000,incRef:{exceptional:18,strong:14,meets:9},desc:'Leads design on projects. Mentors. Client-facing.'},
+        {name:'Lead Designer / Art Director',salaryMin:58000,salaryMax:80000,incRef:{exceptional:15,strong:11,meets:7},desc:'Creative direction on accounts. Standards and brand consistency.'},
+        {name:'Design Manager',salaryMin:80000,salaryMax:120000,incRef:{exceptional:12,strong:8,meets:5},desc:'Team management. Creative quality and output ownership.'},
+        {name:'Head of Design / Creative Director',salaryMin:120000,salaryMax:180000,incRef:{exceptional:10,strong:7,meets:4},desc:'Creative department head. Brand vision. C-suite accountability.'},
+      ]
+    },
+    'Strategy':{
+      levels:[
+        {name:'Strategy Analyst',salaryMin:20000,salaryMax:30000,incRef:{exceptional:25,strong:18,meets:12},desc:'Research, data analysis, presentation support.'},
+        {name:'Strategy Consultant',salaryMin:30000,salaryMax:45000,incRef:{exceptional:22,strong:16,meets:10},desc:'Owns analytical work streams. Client-ready deliverables.'},
+        {name:'Senior Consultant',salaryMin:45000,salaryMax:65000,incRef:{exceptional:18,strong:14,meets:9},desc:'Leads projects. Client relationships. Mentors analysts.'},
+        {name:'Strategy Manager',salaryMin:65000,salaryMax:90000,incRef:{exceptional:15,strong:11,meets:7},desc:'Account or project ownership. Stakeholder management.'},
+        {name:'Strategy Director',salaryMin:90000,salaryMax:130000,incRef:{exceptional:12,strong:8,meets:5},desc:'Department leadership. New business. Growth strategy.'},
+        {name:'Head of Strategy',salaryMin:130000,salaryMax:200000,incRef:{exceptional:10,strong:7,meets:4},desc:'Practice head. C-suite reporting. Overall strategic direction.'},
+      ]
+    },
+    'Operations':{
+      levels:[
+        {name:'Operations Executive',salaryMin:18000,salaryMax:25000,incRef:{exceptional:25,strong:18,meets:12},desc:'Process execution, vendor coordination, admin support.'},
+        {name:'Operations Analyst',salaryMin:25000,salaryMax:35000,incRef:{exceptional:22,strong:16,meets:10},desc:'Process improvement. Reporting. Compliance tracking.'},
+        {name:'Senior Operations Analyst',salaryMin:35000,salaryMax:50000,incRef:{exceptional:18,strong:14,meets:9},desc:'Owns process areas. Cross-team coordination.'},
+        {name:'Operations Manager',salaryMin:50000,salaryMax:75000,incRef:{exceptional:15,strong:11,meets:7},desc:'Team management. Operational P&L. Vendor management.'},
+        {name:'Head of Operations',salaryMin:75000,salaryMax:120000,incRef:{exceptional:12,strong:8,meets:5},desc:'Department head. Systems, compliance, efficiency.'},
+        {name:'VP Operations',salaryMin:120000,salaryMax:180000,incRef:{exceptional:10,strong:7,meets:4},desc:'Senior leadership. Strategic operations.'},
+      ]
+    },
+    'HR':{
+      levels:[
+        {name:'HR Executive',salaryMin:18000,salaryMax:28000,incRef:{exceptional:25,strong:18,meets:12},desc:'Recruitment support, onboarding, admin tasks.'},
+        {name:'HR Associate',salaryMin:28000,salaryMax:40000,incRef:{exceptional:22,strong:16,meets:10},desc:'Independent HR processes. Employee lifecycle management.'},
+        {name:'HR Manager',salaryMin:40000,salaryMax:60000,incRef:{exceptional:18,strong:14,meets:9},desc:'Owns HR operations. Policy implementation. Employee relations.'},
+        {name:'Senior HR Manager',salaryMin:60000,salaryMax:85000,incRef:{exceptional:15,strong:11,meets:7},desc:'Strategic HR. Appraisal cycles. Compensation benchmarking.'},
+        {name:'HR Business Partner',salaryMin:85000,salaryMax:120000,incRef:{exceptional:12,strong:8,meets:5},desc:'Business-aligned HR strategy. Leadership partner.'},
+        {name:'Head of People & Culture',salaryMin:120000,salaryMax:180000,incRef:{exceptional:10,strong:7,meets:4},desc:'HR department head. Culture, OD, C-suite reporting.'},
+      ]
+    },
+  },
+
+  appraisals:[
+    {emp:'APX-001',period:'Annual 2023–24',scoreA:82,scoreB:80,scoreC:75,final:81.1,band:'Strong',manager:'Arjun Nair',status:'Finalised'},
+    {emp:'APX-002',period:'Annual 2023–24',scoreA:76,scoreB:82,scoreC:70,final:77.0,band:'Meets Expectations',manager:'Priya Mehta',status:'Finalised'},
+    {emp:'APX-004',period:'Annual 2023–24',scoreA:90,scoreB:88,scoreC:80,final:88.8,band:'Strong',manager:'Riya Sharma',status:'Finalised'},
+    {emp:'APX-007',period:'Annual 2023–24',scoreA:93,scoreB:91,scoreC:88,final:92.3,band:'Exceptional',manager:'CEO',status:'Finalised'},
+  ],
+  levelHistory:[],
+  payrollRecords:[],
+  reminders:[
+    {id:1,title:'Appraisal due — Riya Sharma',emp:'APX-001',date:'2025-03-15',type:'Appraisal',priority:'high',status:'Pending',notes:'3rd annual'},
+    {id:2,title:'Probation review — Pooja Verma',emp:'APX-005',date:'2024-07-01',type:'Probation',priority:'high',status:'Pending',notes:'90-day'},
+    {id:3,title:'Level Review — Anjali Rao',emp:'APX-003',date:'2025-01-10',type:'Level Review',priority:'medium',status:'Pending',notes:'18 months in level'},
+  ],
+  nextRemId:4,
+  leaveData:{},
+  leaveYears:['2024-25','2023-24','2022-23','2021-22'],
+  branding:{company:'Apexure India Pvt. Ltd.',title:'HRMS'},
+  weights:{a:70,b:20,c:10},
+  bands:{exceptional:{min:90,max:100,label:'Exceptional'},strong:{min:80,max:89.99,label:'Strong'},meets:{min:70,max:79.99,label:'Meets Expectations'},below:{min:0,max:69.99,label:'Below Expectations'}},
+  meritMatrix:[
+    {min:19000,max:25000,exceptional:25,strong:18,meets:12},
+    {min:25000,max:30000,exceptional:22,strong:16,meets:10},
+    {min:30000,max:40000,exceptional:18,strong:14,meets:9},
+    {min:40000,max:50000,exceptional:15,strong:11,meets:7},
+    {min:50000,max:60000,exceptional:12,strong:8,meets:5},
+    {min:60000,max:70000,exceptional:10,strong:7,meets:4},
+  ],
+  matrixCaps:{exceptional:5000,strong:3500,meets:2100},
+  statutory:{empPF:12,erPF:12,pfCeiling:15000,pfAdmin:0.5,edli:0.5,esiEmp:0.75,esiEr:3.25,esiCeiling:21000,pfHC:20,esiHC:10,basicPct:50},
+  scheduleRules:{annualCount:3,biennialYears:2,promoMonths:18,probMonths:3},
+  levelRules:{minMonths:18,minScore:70,minYears:1,cycleMo:12,deferMo:12,annualCount:3,biennialYears:2},
+  currentKPIs:[],
+  editingEmpId:null,
+  editingUserId:null,
+  kpiTemplates:{
+    'Web Development':[{kpi:'Sprint velocity / task completion',weight:25},{kpi:'Code quality (bug rate, review score)',weight:20},{kpi:'On-time project delivery',weight:25},{kpi:'Technical documentation',weight:15},{kpi:'Client satisfaction',weight:15}],
+    'Digital Marketing':[{kpi:'Campaign performance vs targets',weight:30},{kpi:'Content quality and volume',weight:20},{kpi:'SEO / ranking improvement',weight:20},{kpi:'Reporting accuracy & timeliness',weight:15},{kpi:'New channel adoption',weight:15}],
+    'Client Accounts':[{kpi:'Client retention & NPS',weight:30},{kpi:'Revenue from accounts',weight:25},{kpi:'Upsell / cross-sell',weight:20},{kpi:'Proposal quality',weight:15},{kpi:'Internal coordination',weight:10}],
+    'Design':[{kpi:'Design quality & originality',weight:30},{kpi:'On-time delivery',weight:25},{kpi:'Client/internal feedback',weight:20},{kpi:'Brand consistency',weight:15},{kpi:'File organisation & handoff',weight:10}],
+    'Strategy':[{kpi:'Quality of strategic recommendations',weight:35},{kpi:'Research depth & accuracy',weight:25},{kpi:'Presentation quality',weight:20},{kpi:'Deadlines',weight:20}],
+    'Operations':[{kpi:'Process efficiency',weight:30},{kpi:'Vendor/cost management',weight:20},{kpi:'Compliance & documentation',weight:25},{kpi:'Internal SLA adherence',weight:25}],
+    'HR':[{kpi:'Recruitment TAT & quality',weight:25},{kpi:'Employee satisfaction initiatives',weight:25},{kpi:'Policy compliance',weight:25},{kpi:'Onboarding & training',weight:25}],
+  },
+};
+
+// ════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════
+const fmt=v=>'₹'+Number(v||0).toLocaleString('en-IN');
+const fmtN=v=>Number(v||0).toFixed(2);
+const fmtDate=d=>{if(!d)return '—';return new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})};
+const diffDays=(d1,d2)=>Math.round((new Date(d2)-new Date(d1))/86400000);
+const addMonths=(d,m)=>{const dt=new Date(d);dt.setMonth(dt.getMonth()+m);return dt;};
+const addYears=(d,y)=>{const dt=new Date(d);dt.setFullYear(dt.getFullYear()+y);return dt;};
+function exportTbl(id,fn){const t=document.getElementById(id);if(!t)return;const rows=[...t.querySelectorAll('tr')].map(r=>[...r.querySelectorAll('th,td')].map(c=>'"'+c.innerText.trim().replace(/"/g,'""')+'"').join(','));const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));a.download=fn;a.click();}
+function closeModal(id){document.getElementById(id).style.display='none';}
+const allDepts=()=>Object.keys(DB.ladders);
+
+function getDeptLevel(emp){
+  const ladder=DB.ladders[emp.dept];
+  if(!ladder)return {idx:emp.levelIdx||0,name:'L'+(emp.levelIdx+1)};
+  return {idx:emp.levelIdx||0,name:ladder.levels[emp.levelIdx]?.name||'L'+(emp.levelIdx+1)};
 }
 
-function nav(sec){
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById('s-' + sec).classList.add('active');
+function scoreToBand(s){
+  const b=DB.bands;
+  if(s>=b.exceptional.min)return b.exceptional.label;
+  if(s>=b.strong.min)return b.strong.label;
+  if(s>=b.meets.min)return b.meets.label;
+  return b.below.label;
+}
+function bandCls(b){
+  if(!b)return 'b-muted';
+  const bl=b.toLowerCase();
+  if(bl.includes('except'))return 'b-green';
+  if(bl.includes('strong'))return 'b-accent';
+  if(bl.includes('meets'))return 'b-amber';
+  return 'b-red';
 }
 
-async function saveAppraisal() {
-  const appraisalData = {
-    employee: document.getElementById('apr-emp').value,
-    period: document.getElementById('apr-period').value,
-    score: document.getElementById('final-score').value,
-    timestamp: new Date().toISOString()
-  };
+function visEmp(){
+  const u=me();if(!u)return[];
+  if(can('viewAllEmployees'))return DB.employees;
+  const grants=MGR_ACCESS.filter(g=>g.manager===u.username);
+  return DB.employees.filter(e=>{
+    if(e.manager===u.name)return true;
+    if(grants.some(g=>g.type==='employee'&&g.target===e.id))return true;
+    if(grants.some(g=>g.type==='department'&&g.target===e.dept))return true;
+    if(grants.some(g=>g.type==='all'))return true;
+    if(u.empId===e.id)return true;
+    return false;
+  });
+}
 
-  if (!supabaseClient) {
-    alert("Supabase client not initialized.");
+function populateAllSelects(){
+  // Emp selects
+  const eIds=['apr-emp','inc-emp','pay-emp','ob-emp','prob-emp','exit-emp','rm-emp','mu-emp','ma-emp','lc-emp'];
+  const ve=visEmp();
+  eIds.forEach(id=>{
+    const s=document.getElementById(id);if(!s)return;
+    const c=s.value;
+    s.innerHTML='<option value="">'+( id==='mu-emp'||id==='ma-emp'||id==='rm-emp'?'None / Not specific':'Select employee')+'</option>'+ve.map(e=>`<option value="${e.id}">${e.name} (${e.id})</option>`).join('');
+    if(c)s.value=c;
+  });
+  // Manager select in mgr-modal
+  const mm=document.getElementById('ma-mgr');if(mm)mm.innerHTML=AUTH.users.filter(u=>u.role==='manager').map(u=>`<option value="${u.username}">${u.name}</option>`).join('');
+  // Dept selects
+  const depts=allDepts();
+  ['mu-dept','ma-dept'].forEach(id=>{
+    const s=document.getElementById(id);if(!s)return;
+    s.innerHTML=(id==='ma-dept'?'<option value="">All</option>':'')+depts.map(d=>`<option>${d}</option>`).join('');
+  });
+}
+
+function autoPopDeptFilters(){
+  const depts=allDepts();
+  ['emp-dept-f'].forEach(id=>{
+    const s=document.getElementById(id);if(!s)return;
+    s.innerHTML='<option value="">All Departments</option>'+depts.map(d=>`<option>${d}</option>`).join('');
+  });
+}
+
+// ════════════════════════════════════
+// NAV
+// ════════════════════════════════════
+const PAGE_TITLES={dashboard:'Dashboard',employees:'Employee Master',career:'Career Levels',appraisal:'Performance & Appraisal',levelreview:'Level Review',schedule:'Appraisal & Level Schedule',increment:'Increment Calculator',payroll:'Payroll & CTC',leave:'Leave Tracker',operations:'HR Operations',admin:'Access & User Management',settings:'Settings',reminders:'Reminders & Alerts'};
+function nav(id){
+  if(!can(id)){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    const sec=document.getElementById('s-'+id);
+    if(sec){sec.classList.add('active');sec.innerHTML='<div class="access-denied"><div style="font-size:36px">🔒</div><div style="font-size:14px;color:var(--text)">Access Restricted</div><div>Your role does not have permission to access this module.</div><div style="font-size:11px">Contact Super Admin.</div></div>';}
+    document.getElementById('page-title').textContent=PAGE_TITLES[id]||id;
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    const nb=document.getElementById('nav-'+id);if(nb)nb.classList.add('active');
+    document.getElementById('reminder-panel').classList.remove('open');
     return;
   }
-
-  const { error } = await supabaseClient
-    .from('appraisals')
-    .insert([{ data: appraisalData }]);
-  
-  if (error) {
-    alert("Database Error: " + error.message);
-  } else {
-    alert("Appraisal saved permanently to Supabase!");
-  }
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const sec=document.getElementById('s-'+id);if(sec)sec.classList.add('active');
+  const nb=document.getElementById('nav-'+id);if(nb)nb.classList.add('active');
+  document.getElementById('page-title').textContent=PAGE_TITLES[id]||id;
+  document.getElementById('reminder-panel').classList.remove('open');
+  if(id==='dashboard')renderDashboard();
+  if(id==='employees')renderEmpTable();
+  if(id==='career'){renderCareerLadders();renderSalaryRef();renderMatrix();renderDeptTable();}
+  if(id==='appraisal'){populateAllSelects();renderAprRecords();renderKPITemplates();syncWeights();}
+  if(id==='levelreview'){populateAllSelects();renderLevelReview();renderLevelHistory();}
+  if(id==='schedule')renderSchedule();
+  if(id==='increment'){populateAllSelects();renderMatrix();}
+  if(id==='payroll'){populateAllSelects();renderPayHistory();}
+  if(id==='leave')renderLeaveTable();
+  if(id==='operations'){populateAllSelects();renderChecklists();renderProbTable();}
+  if(id==='admin'){renderUsersTable();renderRolePerms();renderMgrTable();renderShareSummary();}
+  if(id==='settings'){initSettings();}
+  if(id==='reminders')renderRemTable();
 }
+function switchTab(pre,id){
+  document.querySelectorAll('[id^="'+pre+'-"]').forEach(p=>{if(p.classList.contains('tab-pane'))p.classList.remove('active');});
+  const tp=document.getElementById(pre+'-'+id);if(tp)tp.classList.add('active');
+  event.target.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// ════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════
+function renderDashboard(){
+  const active=DB.employees.filter(e=>e.status==='Active').length;
+  const prob=DB.employees.filter(e=>e.status==='Probation').length;
+  const today=new Date();
+  const up=DB.employees.filter(e=>{const d=diffDays(today,nextAprDate(e));return d>=0&&d<=90;}).length;
+  const pendRem=DB.reminders.filter(r=>r.status==='Pending').length;
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="stat"><div class="stat-label">Active Headcount</div><div class="stat-val">${active}</div><div class="stat-sub">${prob} on probation</div></div>
+    <div class="stat"><div class="stat-label">Total Employees</div><div class="stat-val">${DB.employees.length}</div><div class="stat-sub">All departments</div></div>
+    <div class="stat"><div class="stat-label">Appraisals Due (90d)</div><div class="stat-val">${up}</div><div class="stat-sub"><span class="badge b-amber">Need review</span></div></div>
+    <div class="stat"><div class="stat-label">Pending Reminders</div><div class="stat-val">${pendRem}</div><div class="stat-sub">Active alerts</div></div>`;
+  const rows=DB.employees.filter(e=>diffDays(today,nextAprDate(e))<=90).sort((a,b)=>nextAprDate(a)-nextAprDate(b));
+  document.getElementById('dash-appr-tbl').innerHTML=`<thead><tr><th>Employee</th><th>Dept</th><th>Level</th><th>Next Appraisal</th><th>Days</th></tr></thead><tbody>`+rows.map(e=>{const nd=nextAprDate(e);const d=diffDays(today,nd);return `<tr><td>${e.name}</td><td>${e.dept}</td><td>${getDeptLevel(e).name}</td><td>${fmtDate(nd)}</td><td><span class="badge ${d<0?'b-red':d<=30?'b-amber':'b-green'}">${d<0?'Overdue':d+' days'}</span></td></tr>`;}).join('')+'</tbody>';
+  const bdist={};DB.appraisals.forEach(a=>{bdist[a.band]=(bdist[a.band]||0)+1;});
+  const tot=DB.appraisals.length||1;
+  document.getElementById('dash-dist').innerHTML=Object.entries(bdist).map(([b,c])=>`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span>${b}</span><span style="color:var(--muted)">${c}</span></div><div class="prog"><div class="prog-fill" style="width:${(c/tot*100).toFixed(0)}%;background:${b.includes('Except')?'var(--green)':b.includes('Strong')?'var(--accent)':b.includes('Meets')?'var(--amber)':'var(--red)'}"></div></div></div>`).join('');
+  document.getElementById('dash-pending').innerHTML=`<div style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px"><span>Appraisal reviews pending</span><span class="badge b-amber">${Math.max(0,up-DB.appraisals.filter(a=>a.status==='Finalised').length)}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px"><span>On probation</span><span class="badge b-amber">${prob}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px"><span>Incomplete documents</span><span class="badge b-red">${DB.employees.filter(e=>Object.values(e.docs).some(v=>!v)).length}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:12px"><span>Level reviews due (18 months)</span><span class="badge b-purple">${DB.employees.filter(e=>{const lDate=e.levelDate||e.doj;const months=diffDays(new Date(lDate),new Date())/30.4;return months>=DB.levelRules.minMonths;}).length}</span></div>
+  </div>`;
+  const prev=DB.reminders.filter(r=>r.status==='Pending').slice(0,4);
+  document.getElementById('dash-rem-preview').innerHTML=prev.length?prev.map(r=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px"><span>${r.title}</span><span class="badge ${r.priority==='high'?'b-red':'b-amber'}">${fmtDate(r.date)}</span></div>`).join(''):'<div style="color:var(--muted);font-size:12px">No pending reminders.</div>';
+}
+
+// ════════════════════════════════════
+// EMPLOYEES
+// ════════════════════════════════════
+function renderEmpTable(){
+  const q=(document.getElementById('emp-search')?.value||'').toLowerCase();
+  const df=document.getElementById('emp-dept-f')?.value||'';
+  const ve=visEmp().filter(e=>(!q||e.name.toLowerCase().includes(q)||e.id.toLowerCase().includes(q)||e.dept.toLowerCase().includes(q))&&(!df||e.dept===df));
+  const canEdit=can('editEmployee');const canSal=can('viewSalary');
+  const addBtn=document.getElementById('btn-add-emp');if(addBtn)addBtn.style.display=canEdit?'':'none';
+  document.getElementById('emp-tbody').innerHTML=ve.map(e=>{
+    const lv=getDeptLevel(e);
+    return `<tr>
+      <td class="mono" style="font-size:11px">${e.id}</td>
+      <td><strong>${e.name}</strong><div style="font-size:10px;color:var(--muted)">${e.email}</div></td>
+      <td style="font-size:11px">${e.desig}</td><td>${e.dept}</td>
+      <td><span class="badge b-accent" title="${lv.name}">${lv.name}</span></td>
+      <td style="font-size:11px">${fmtDate(e.doj)}</td>
+      <td><span class="badge ${e.status==='Active'?'b-green':e.status==='Probation'?'b-amber':'b-red'}">${e.status}</span></td>
+      <td class="mono">${canSal?fmt(e.gross):'••••••'}</td>
+      <td style="font-size:11px;color:var(--muted)">${e.manager}</td>
+      <td>${canEdit?`<button class="btn btn-secondary btn-xs" onclick="editEmployee('${e.id}')">Edit</button>`:''}</td>
+    </tr>`;
+  }).join('');
+}
+function openEmpModal(){
+  if(!can('editEmployee')){alert('Permission denied.');return;}
+  DB.editingEmpId=null;
+  document.getElementById('emp-modal-title').textContent='Add Employee';
+  ['m-id','m-name','m-desig','m-manager','m-email'].forEach(id=>document.getElementById(id).value='');
+  ['m-gross','m-basic','m-ctc','m-apr-done'].forEach(id=>document.getElementById(id).value='0');
+  document.getElementById('m-doj').value='';document.getElementById('m-level-date').value='';
+  document.getElementById('m-status').value='Active';
+  populateDeptOptions();
+  document.getElementById('emp-modal').style.display='flex';
+}
+function editEmployee(id){
+  if(!can('editEmployee')){alert('Permission denied.');return;}
+  DB.editingEmpId=id;const e=DB.employees.find(x=>x.id===id);if(!e)return;
+  document.getElementById('emp-modal-title').textContent='Edit Employee — '+e.name;
+  document.getElementById('m-id').value=e.id;document.getElementById('m-name').value=e.name;
+  document.getElementById('m-desig').value=e.desig;document.getElementById('m-status').value=e.status;
+  document.getElementById('m-gross').value=e.gross;document.getElementById('m-basic').value=e.basic;
+  document.getElementById('m-ctc').value=e.ctc;document.getElementById('m-manager').value=e.manager;
+  document.getElementById('m-email').value=e.email;document.getElementById('m-doj').value=e.doj;
+  document.getElementById('m-level-date').value=e.levelDate||'';
+  document.getElementById('m-apr-done').value=e.appraisalsDone||0;
+  populateDeptOptions();
+  setTimeout(()=>{
+    document.getElementById('m-dept').value=e.dept;
+    populateLevelSelect();
+    setTimeout(()=>{document.getElementById('m-level').value=e.levelIdx;},30);
+  },30);
+  document.getElementById('emp-modal').style.display='flex';
+}
+function populateDeptOptions(){
+  const s=document.getElementById('m-dept');
+  s.innerHTML=allDepts().map(d=>`<option>${d}</option>`).join('');
+  populateLevelSelect();
+}
+function populateLevelSelect(){
+  const dept=document.getElementById('m-dept').value;
+  const ladder=DB.ladders[dept];
+  const s=document.getElementById('m-level');
+  if(!ladder){s.innerHTML='<option value="0">L1</option><option value="1">L2</option><option value="2">L3</option><option value="3">L4</option><option value="4">L5</option><option value="5">L6</option>';return;}
+  s.innerHTML=ladder.levels.map((l,i)=>`<option value="${i}">${l.name}</option>`).join('');
+}
+function saveEmployee(){
+  const id=document.getElementById('m-id').value.trim();const nm=document.getElementById('m-name').value.trim();
+  if(!id||!nm){alert('ID and name required.');return;}
+  const emp={id,name:nm,desig:document.getElementById('m-desig').value.trim(),dept:document.getElementById('m-dept').value,levelIdx:+document.getElementById('m-level').value||0,doj:document.getElementById('m-doj').value,levelDate:document.getElementById('m-level-date').value||document.getElementById('m-doj').value,status:document.getElementById('m-status').value,gross:+document.getElementById('m-gross').value||0,basic:+document.getElementById('m-basic').value||0,ctc:+document.getElementById('m-ctc').value||0,manager:document.getElementById('m-manager').value.trim(),email:document.getElementById('m-email').value.trim(),appraisalsDone:+document.getElementById('m-apr-done').value||0};
+  const idx=DB.employees.findIndex(e=>e.id===id);
+  if(idx>=0){emp.docs=DB.employees[idx].docs;DB.employees[idx]=emp;}else{emp.docs={offer:false,pan:false,aadhaar:false,bank:false,pf:false,qual:false,photo:false,policies:false};DB.employees.push(emp);}
+  closeModal('emp-modal');renderEmpTable();populateAllSelects();
+}
+
+// ════════════════════════════════════
+// CAREER LADDERS
+// ════════════════════════════════════
+let careerActiveDept=null;let salaryRefDept=null;
+function renderCareerLadders(){
+  const depts=allDepts();
+  if(!careerActiveDept)careerActiveDept=depts[0];
+  document.getElementById('career-dept-pills').innerHTML=depts.map(d=>`<button class="dept-pill ${d===careerActiveDept?'active':''}" onclick="selectCareerDept('${d}')">${d}</button>`).join('');
+  renderLadderForDept(careerActiveDept);
+}
+function selectCareerDept(dept){careerActiveDept=dept;renderCareerLadders();}
+function renderLadderForDept(dept){
+  const ladder=DB.ladders[dept];if(!ladder)return;
+  const canSA=isSA()||can('editMatrix');
+  document.getElementById('career-ladder-body').innerHTML=`
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">${dept} — Career Ladder</span>
+        <div style="display:flex;gap:6px">
+          ${canSA?`<button class="btn btn-secondary btn-sm" onclick="addLevel('${dept}')">+ Add Level</button>`:''}
+          <button class="btn btn-primary btn-sm" onclick="saveLadder('${dept}')">Save</button>
+        </div>
+      </div>
+      <div class="card-body">
+        ${ladder.levels.map((lv,i)=>`
+          <div class="level-card" id="lc-${dept.replace(/\s/g,'_')}-${i}">
+            <div class="level-card-head">
+              <span class="level-badge">Level ${i+1}</span>
+              <input type="text" value="${lv.name}" onchange="DB.ladders['${dept}'].levels[${i}].name=this.value" style="flex:1;min-width:160px;font-weight:500" placeholder="Level name"/>
+              ${canSA&&ladder.levels.length>2?`<button class="btn btn-danger btn-xs" onclick="removeLevel('${dept}',${i})">Remove</button>`:''}
+            </div>
+            <div class="form-row r2">
+              <div class="fg"><label>Description</label><textarea onchange="DB.ladders['${dept}'].levels[${i}].desc=this.value" style="min-height:55px">${lv.desc}</textarea></div>
+              <div>
+                <div class="form-row r2" style="margin-bottom:8px">
+                  <div class="fg"><label>Salary Min (₹/mo)</label><input type="number" value="${lv.salaryMin}" onchange="DB.ladders['${dept}'].levels[${i}].salaryMin=+this.value"/></div>
+                  <div class="fg"><label>Salary Max (₹/mo)</label><input type="number" value="${lv.salaryMax}" onchange="DB.ladders['${dept}'].levels[${i}].salaryMax=+this.value"/></div>
+                </div>
+                <div class="form-row r3">
+                  <div class="fg"><label>Exc Inc %</label><input type="number" value="${lv.incRef.exceptional}" onchange="DB.ladders['${dept}'].levels[${i}].incRef.exceptional=+this.value"/></div>
+                  <div class="fg"><label>Strong Inc %</label><input type="number" value="${lv.incRef.strong}" onchange="DB.ladders['${dept}'].levels[${i}].incRef.strong=+this.value"/></div>
+                  <div class="fg"><label>Meets Inc %</label><input type="number" value="${lv.incRef.meets}" onchange="DB.ladders['${dept}'].levels[${i}].incRef.meets=+this.value"/></div>
+                </div>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+function addLevel(dept){DB.ladders[dept].levels.push({name:'New Level',salaryMin:0,salaryMax:0,incRef:{exceptional:10,strong:7,meets:5},desc:'Description…'});renderLadderForDept(dept);}
+function removeLevel(dept,i){if(!confirm('Remove this level?'))return;DB.ladders[dept].levels.splice(i,1);renderLadderForDept(dept);}
+function saveLadder(dept){alert('Ladder for '+dept+' saved (session only).');}
+
+function renderSalaryRef(){
+  const depts=allDepts();
+  if(!salaryRefDept)salaryRefDept=depts[0];
+  document.getElementById('salary-ref-dept-pills').innerHTML=depts.map(d=>`<button class="dept-pill ${d===salaryRefDept?'active':''}" onclick="selectSalaryRefDept('${d}')">${d}</button>`).join('');
+  renderSalaryRefTable(salaryRefDept);
+}
+function selectSalaryRefDept(d){salaryRefDept=d;renderSalaryRef();}
+function renderSalaryRefTable(dept){
+  const ladder=DB.ladders[dept];if(!ladder){document.getElementById('salary-ref-body').innerHTML='<div style="color:var(--muted)">No ladder configured for this department.</div>';return;}
+  document.getElementById('salary-ref-body').innerHTML=`<div class="card"><div class="card-head"><span class="card-title">${dept} — Salary & Increment Reference</span><span style="font-size:11px;color:var(--muted)">Editable reference — not automatic</span></div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Level</th><th>Name</th><th>Salary Min (₹/mo)</th><th>Salary Max (₹/mo)</th><th>Exceptional Inc %</th><th>Strong Inc %</th><th>Meets Inc %</th></tr></thead>
+      <tbody>${ladder.levels.map((lv,i)=>`<tr>
+        <td><span class="badge b-accent">Level ${i+1}</span></td>
+        <td><strong>${lv.name}</strong></td>
+        <td class="mono">${fmt(lv.salaryMin)}</td>
+        <td class="mono">${fmt(lv.salaryMax)}</td>
+        <td><input type="number" value="${lv.incRef.exceptional}" onchange="DB.ladders['${dept}'].levels[${i}].incRef.exceptional=+this.value" style="width:65px"/></td>
+        <td><input type="number" value="${lv.incRef.strong}" onchange="DB.ladders['${dept}'].levels[${i}].incRef.strong=+this.value" style="width:65px"/></td>
+        <td><input type="number" value="${lv.incRef.meets}" onchange="DB.ladders['${dept}'].levels[${i}].incRef.meets=+this.value" style="width:65px"/></td>
+      </tr>`).join('')}</tbody>
+    </table></div></div>`;
+}
+function saveLevelRules(){
+  DB.levelRules={minMonths:+document.getElementById('lr-min-months').value||18,minScore:+document.getElementById('lr-min-score').value||70,minYears:+document.getElementById('lr-min-years').value||1,cycleMo:+document.getElementById('lr-cycle').value||12,deferMo:+document.getElementById('lr-defer').value||12,annualCount:+document.getElementById('lr-annual-count').value||3,biennialYears:+document.getElementById('lr-biennial').value||2};
+  DB.scheduleRules={annualCount:DB.levelRules.annualCount,biennialYears:DB.levelRules.biennialYears,promoMonths:DB.levelRules.minMonths,probMonths:3};
+  alert('Level rules saved (session only).');
+}
+
+// ════════════════════════════════════
+// APPRAISALS
+// ════════════════════════════════════
+function loadAprTemplate(){
+  const id=document.getElementById('apr-emp').value;if(!id){DB.currentKPIs=[];renderKPIRows();return;}
+  const emp=DB.employees.find(e=>e.id===id);if(!emp)return;
+  if(!can('editAppraisal')){alert('Permission denied.');return;}
+  document.getElementById('apr-manager').value=me()?.name||emp.manager;
+  DB.currentKPIs=(DB.kpiTemplates[emp.dept]||DB.kpiTemplates['Web Development']).map(t=>({...t,rating:0,actual:'',target:''}));
+  renderKPIRows();syncWeights();
+}
+function renderKPIRows(){
+  document.getElementById('kpi-tbody').innerHTML=DB.currentKPIs.map((r,i)=>`
+    <tr>
+      <td><input type="text" value="${r.kpi}" onchange="DB.currentKPIs[${i}].kpi=this.value" style="width:100%"/></td>
+      <td><input type="text" value="${r.target||''}" onchange="DB.currentKPIs[${i}].target=this.value" placeholder="Target" style="width:80px"/></td>
+      <td><input type="text" value="${r.actual||''}" onchange="DB.currentKPIs[${i}].actual=this.value" placeholder="Actual" style="width:80px"/></td>
+      <td><input type="number" min="0" max="10" step="0.5" value="${r.rating||0}" onchange="DB.currentKPIs[${i}].rating=+this.value;calcApr()" style="width:70px"/></td>
+      <td><input type="number" min="0" max="100" value="${r.weight}" onchange="DB.currentKPIs[${i}].weight=+this.value;calcApr()" style="width:60px"/></td>
+      <td class="mono" id="kws-${i}">—</td>
+    </tr>`).join('');
+}
+function addKPIRow(){DB.currentKPIs.push({kpi:'New KPI',target:'',actual:'',rating:0,weight:0});renderKPIRows();}
+function calcApr(){
+  const tw=DB.currentKPIs.reduce((s,r)=>s+r.weight,0);
+  let sA=0;
+  DB.currentKPIs.forEach((r,i)=>{const ws=tw>0?(r.rating/10*100*(r.weight/tw)):0;sA+=ws;const el=document.getElementById('kws-'+i);if(el)el.textContent=fmtN(ws);});
+  document.getElementById('apr-a-raw').textContent=fmtN(sA);
+  const bv=['b-attendance','b-punctuality','b-leave','b-conduct','b-collab'].map(id=>+(document.getElementById(id)?.value||0));
+  const sB=bv.reduce((s,v)=>s+v,0)/5*10;
+  document.getElementById('apr-b-raw').textContent=fmtN(sB);
+  const certs=Math.min(+(document.getElementById('c-certs')?.value||0),10);
+  const sC=(certs/10*40)+(+(document.getElementById('c-training')?.value||0)/10*30)+(+(document.getElementById('c-applied')?.value||0)/10*30);
+  document.getElementById('apr-c-raw').textContent=fmtN(sC);
+  const wA=DB.weights.a/100,wB=DB.weights.b/100,wC=DB.weights.c/100;
+  const final=sA*wA+sB*wB+sC*wC;
+  const band=scoreToBand(final);
+  document.getElementById('final-a').textContent=(sA*wA).toFixed(2)+' pts';
+  document.getElementById('final-b').textContent=(sB*wB).toFixed(2)+' pts';
+  document.getElementById('final-c').textContent=(sC*wC).toFixed(2)+' pts';
+  document.getElementById('final-score').textContent=fmtN(final)+' / 100';
+  document.getElementById('final-band').innerHTML=`<span class="badge ${bandCls(band)}">${band}</span>`;
+  return{sA,sB,sC,final,band};
+}
+function syncWeights(){
+  document.getElementById('wt-a').value=DB.weights.a;document.getElementById('wt-b').value=DB.weights.b;document.getElementById('wt-c').value=DB.weights.c;
+  updateWeightBar();
+  document.getElementById('badge-wA').textContent=DB.weights.a+'%';document.getElementById('badge-wB').textContent=DB.weights.b+'%';document.getElementById('badge-wC').textContent=DB.weights.c+'%';
+  document.getElementById('fl-a').textContent='Section A ('+DB.weights.a+'%)';document.getElementById('fl-b').textContent='Section B ('+DB.weights.b+'%)';document.getElementById('fl-c').textContent='Section C ('+DB.weights.c+'%)';
+  document.getElementById('final-formula').textContent='Formula: (A×'+(DB.weights.a/100)+')+(B×'+(DB.weights.b/100)+')+(C×'+(DB.weights.c/100)+')';
+}
+function updateWeightBar(){
+  const a=+document.getElementById('wt-a')?.value||0,b=+document.getElementById('wt-b')?.value||0,c=+document.getElementById('wt-c')?.value||0,t=a+b+c;
+  const wb=document.getElementById('wbar-a');if(wb)wb.style.width=a+'%';
+  const wb2=document.getElementById('wbar-b');if(wb2)wb2.style.width=b+'%';
+  const wb3=document.getElementById('wbar-c');if(wb3)wb3.style.width=c+'%';
+  const td=document.getElementById('wt-total');if(td){td.textContent='Total: '+t+'%';td.style.color=t===100?'var(--green)':'var(--red)';}
+}
+function saveWeights(){
+  if(!can('editWeights')&&!isSA()){alert('Permission denied.');return;}
+  const a=+document.getElementById('wt-a').value,b=+document.getElementById('wt-b').value,c=+document.getElementById('wt-c').value;
+  if(a+b+c!==100){alert('Weights must total 100%. Current: '+(a+b+c)+'%');return;}
+  DB.weights={a,b,c};syncWeights();alert('Weights saved. New appraisals will use A='+a+'%, B='+b+'%, C='+c+'%.');
+}
+function saveBands(){
+  DB.bands={exceptional:{min:+document.getElementById('band-exc-min').value,max:+document.getElementById('band-exc-max').value,label:document.getElementById('band-exc-label').value},strong:{min:+document.getElementById('band-str-min').value,max:+document.getElementById('band-str-max').value,label:document.getElementById('band-str-label').value},meets:{min:+document.getElementById('band-mts-min').value,max:+document.getElementById('band-mts-max').value,label:document.getElementById('band-mts-label').value},below:{min:+document.getElementById('band-blw-min').value,max:+document.getElementById('band-blw-max').value,label:document.getElementById('band-blw-label').value}};
+  alert('Performance bands saved.');
+}
+function saveAppraisal(){
+  if(!can('editAppraisal')){alert('Permission denied.');return;}
+  const id=document.getElementById('apr-emp').value;if(!id){alert('Select an employee.');return;}
+  const sc=calcApr();
+  const emp=DB.employees.find(e=>e.id===id);if(!emp)return;
+  const period=document.getElementById('apr-period').value;
+  const existing=DB.appraisals.findIndex(a=>a.emp===id&&a.period===period);
+  const rec={emp:id,period,scoreA:+sc.sA.toFixed(2),scoreB:+sc.sB.toFixed(2),scoreC:+sc.sC.toFixed(2),final:+sc.final.toFixed(2),band:sc.band,manager:document.getElementById('apr-manager').value,status:'Draft',weights:{...DB.weights}};
+  if(existing>=0)DB.appraisals[existing]=rec;else{DB.appraisals.push(rec);emp.appraisalsDone++;}
+  alert('Appraisal saved as Draft. HR finalises separately. Appraisal score does not change level.');
+  renderAprRecords();
+}
+function renderAprRecords(){
+  const q=(document.getElementById('apr-search')?.value||'').toLowerCase();
+  const canF=can('finaliseAppraisal');
+  document.getElementById('apr-tbody').innerHTML=DB.appraisals.filter(a=>{const emp=DB.employees.find(e=>e.id===a.emp);return !q||(emp&&emp.name.toLowerCase().includes(q))||a.period.toLowerCase().includes(q);}).map(a=>{
+    const emp=DB.employees.find(e=>e.id===a.emp);
+    return `<tr><td>${emp?emp.name:a.emp}</td><td style="font-size:11px">${emp?emp.dept:'—'}</td><td>${a.period}</td><td class="mono"><strong>${fmtN(a.final)}</strong></td><td><span class="badge ${bandCls(a.band)}">${a.band}</span></td><td style="font-size:11px">${a.manager||'—'}</td><td><span class="badge ${a.status==='Finalised'?'b-green':'b-amber'}">${a.status}</span></td><td>${canF&&a.status!=='Finalised'?`<button class="btn btn-green btn-xs" onclick="finaliseApr('${a.emp}','${a.period}')">Finalise</button>`:''}</td></tr>`;
+  }).join('');
+}
+function finaliseApr(eid,period){
+  if(!can('finaliseAppraisal')){alert('Permission denied.');return;}
+  if(!confirm('Finalise this appraisal? Increment and level change remain separate actions.'))return;
+  const r=DB.appraisals.find(a=>a.emp===eid&&a.period===period);if(r)r.status='Finalised';
+  renderAprRecords();
+}
+function renderKPITemplates(){
+  document.getElementById('kpi-templates-body').innerHTML=Object.entries(DB.kpiTemplates).map(([dept,kpis])=>`
+    <div class="card" style="margin-bottom:12px"><div class="card-head"><span class="card-title">${dept}</span></div><div class="card-body">
+      <table class="tbl"><thead><tr><th>KPI</th><th>Weight (%)</th></tr></thead>
+      <tbody>${kpis.map((k,i)=>`<tr><td><input type="text" value="${k.kpi}" onchange="DB.kpiTemplates['${dept}'][${i}].kpi=this.value" style="width:100%"/></td><td><input type="number" value="${k.weight}" onchange="DB.kpiTemplates['${dept}'][${i}].weight=+this.value" style="width:70px"/></td></tr>`).join('')}</tbody>
+      </table><button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="DB.kpiTemplates['${dept}'].push({kpi:'New KPI',weight:0});renderKPITemplates()">+ Add KPI</button>
+    </div></div>`).join('');
+}
+
+// ════════════════════════════════════
+// LEVEL REVIEW
+// ════════════════════════════════════
+function renderLevelReview(){
+  const today=new Date();
+  document.getElementById('lr-tbody').innerHTML=visEmp().map(e=>{
+    const lDate=e.levelDate||e.doj;
+    const monthsInLevel=diffDays(new Date(lDate),today)/30.4;
+    const lv=getDeptLevel(e);
+    const lastApr=DB.appraisals.filter(a=>a.emp===e.id).sort((a,b)=>b.final-a.final)[0];
+    const lastScore=lastApr?lastApr.final:null;
+    const eligible=monthsInLevel>=DB.levelRules.minMonths&&(lastScore===null||lastScore>=DB.levelRules.minScore);
+    const isTopLevel=e.levelIdx>=(DB.ladders[e.dept]?.levels.length-1||5);
+    const isSeniorToMgmt=e.levelIdx===3; // Level 4 (index 3) = Senior
+    let eligBadge='',note='';
+    if(isTopLevel){eligBadge='<span class="badge b-muted">Top Level</span>';note='Already at highest level';}
+    else if(!eligible){eligBadge=`<span class="badge b-muted">Not yet (${monthsInLevel.toFixed(0)} of ${DB.levelRules.minMonths} months)</span>`;note='Continue in current level';}
+    else if(isSeniorToMgmt){eligBadge='<span class="disc-badge">🎯 Discretionary</span>';note='Senior→Management: requires open role + management decision';}
+    else{eligBadge=`<span class="badge b-green">Eligible for Review</span>`;note='HR to initiate review';}
+    const nextReview=eligible?'Ready now':fmtDate(addMonths(new Date(lDate),DB.levelRules.minMonths));
+    return `<tr>
+      <td>${e.name}</td><td>${e.dept}</td>
+      <td><span class="badge b-accent">Level ${e.levelIdx+1}</span></td>
+      <td style="font-size:11px">${lv.name}</td>
+      <td>${monthsInLevel.toFixed(0)} months</td>
+      <td>${lastScore!==null?`<span class="mono">${fmtN(lastScore)}</span>`:'—'}</td>
+      <td>${eligBadge}</td>
+      <td style="font-size:11px">${nextReview}</td>
+      <td style="font-size:11px;color:var(--muted)">${note}</td>
+    </tr>`;
+  }).join('');
+}
+function prefillLevelChange(){
+  const id=document.getElementById('lc-emp').value;if(!id)return;
+  const emp=DB.employees.find(e=>e.id===id);if(!emp)return;
+  const ladder=DB.ladders[emp.dept];
+  const s=document.getElementById('lc-new-level');
+  s.innerHTML='<option value="">Select new level</option>'+(ladder?ladder.levels.map((l,i)=>`<option value="${i}">${l.name} (Level ${i+1})</option>`).join(''):'')+`<option value="${emp.levelIdx}">Keep current (${getDeptLevel(emp).name})</option>`;
+}
+function saveLevelChange(){
+  if(!can('recordLevelChange')){alert('Permission denied. Only HR Admin or Super Admin can record level changes.');return;}
+  const empId=document.getElementById('lc-emp').value;const newLvl=document.getElementById('lc-new-level').value;const notes=document.getElementById('lc-notes').value.trim();
+  if(!empId||newLvl===''){alert('Select employee and new level.');return;}
+  if(!notes){alert('Justification notes are required for a level change.');return;}
+  const type=document.getElementById('lc-type').value;
+  const roleAvail=document.getElementById('lc-role-avail').value;
+  if(type==='discretionary'&&roleAvail==='no'){alert('Management role not available. Hold this decision until a role opens.');return;}
+  const emp=DB.employees.find(e=>e.id===empId);if(!emp)return;
+  const oldLvl=emp.levelIdx;const oldName=getDeptLevel(emp).name;
+  emp.levelIdx=+newLvl;emp.levelDate=document.getElementById('lc-date').value||new Date().toISOString().slice(0,10);
+  DB.levelHistory.push({emp:emp.name,empId,from:`${oldName} (L${oldLvl+1})`,to:`${getDeptLevel(emp).name} (L${+newLvl+1})`,type,date:emp.levelDate,by:me()?.name||'HR',notes});
+  document.getElementById('lc-notes').value='';
+  alert(`Level change recorded: ${emp.name} → ${getDeptLevel(emp).name}.\n\nSalary revision must be done separately in Payroll module after formal management approval.`);
+  renderLevelReview();renderLevelHistory();
+}
+function renderLevelHistory(){
+  document.getElementById('lch-tbody').innerHTML=DB.levelHistory.length?DB.levelHistory.map(h=>`
+    <tr><td>${h.emp}</td><td style="font-size:11px">${h.from}</td><td style="font-size:11px">${h.to}</td>
+    <td><span class="badge ${h.type==='discretionary'?'b-purple':h.type==='skip'?'b-amber':'b-accent'}">${h.type}</span></td>
+    <td style="font-size:11px">${fmtDate(h.date)}</td><td style="font-size:11px">${h.by}</td>
+    <td style="font-size:11px;color:var(--muted);max-width:200px">${h.notes}</td></tr>`).join(''):`<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:16px">No level changes recorded yet.</td></tr>`;
+}
+
+// ════════════════════════════════════
+// SCHEDULE
+// ════════════════════════════════════
+function nextAprDate(emp){
+  const doj=new Date(emp.doj);const done=emp.appraisalsDone||0;const r=DB.scheduleRules;
+  if(done<(r.annualCount||3))return addYears(doj,done+1);
+  const base=addYears(doj,r.annualCount||3);const extra=done-(r.annualCount||3);
+  return addYears(base,(extra+1)*(r.biennialYears||2));
+}
+function renderSchedule(){
+  const today=new Date();
+  document.getElementById('sched-tbody').innerHTML=visEmp().map(e=>{
+    const nd=nextAprDate(e);const d=diffDays(today,nd);
+    const lDate=e.levelDate||e.doj;const mInLevel=diffDays(new Date(lDate),today)/30.4;
+    const lvReady=mInLevel>=DB.levelRules.minMonths;
+    return `<tr>
+      <td class="mono" style="font-size:11px">${e.id}</td><td>${e.name}</td><td>${e.dept}</td>
+      <td><span class="badge b-accent">${getDeptLevel(e).name}</span></td>
+      <td style="font-size:11px">${fmtDate(e.doj)}</td>
+      <td style="text-align:center">${e.appraisalsDone}</td>
+      <td style="font-size:11px">${fmtDate(nd)}</td>
+      <td><span class="badge b-muted">${e.appraisalsDone<(DB.scheduleRules.annualCount||3)?'Annual':'Biennial'}</span></td>
+      <td><span class="badge ${lvReady?'b-purple':'b-muted'}">${lvReady?'Due for review':'In '+Math.max(0,(DB.levelRules.minMonths-mInLevel)).toFixed(0)+' months'}</span></td>
+      <td><span class="badge ${d<0?'b-red':d<=30?'b-amber':'b-green'}">${d<0?'Overdue':d<=30?'Due Soon':'Scheduled'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════════
+// INCREMENT
+// ════════════════════════════════════
+function renderMatrix(){
+  document.getElementById('matrix-tbody').innerHTML=DB.meritMatrix.map((s,i)=>`
+    <tr>
+      <td><input type="number" value="${s.min}" onchange="DB.meritMatrix[${i}].min=+this.value" style="width:100px"/></td>
+      <td><input type="number" value="${s.max}" onchange="DB.meritMatrix[${i}].max=+this.value" style="width:100px"/></td>
+      <td><input type="number" value="${s.exceptional}" onchange="DB.meritMatrix[${i}].exceptional=+this.value" style="width:70px"/> %</td>
+      <td><input type="number" value="${s.strong}" onchange="DB.meritMatrix[${i}].strong=+this.value" style="width:70px"/> %</td>
+      <td><input type="number" value="${s.meets}" onchange="DB.meritMatrix[${i}].meets=+this.value" style="width:70px"/> %</td>
+      <td><button class="btn btn-danger btn-xs" onclick="removeMatrixRow(${i})">✕</button></td>
+    </tr>`).join('');
+  document.getElementById('cap-exc').value=DB.matrixCaps.exceptional;
+  document.getElementById('cap-str').value=DB.matrixCaps.strong;
+  document.getElementById('cap-mts').value=DB.matrixCaps.meets;
+}
+function addMatrixRow(){DB.meritMatrix.push({min:0,max:0,exceptional:10,strong:7,meets:5});renderMatrix();}
+function removeMatrixRow(i){if(DB.meritMatrix.length<=1){alert('Must have at least one slab.');return;}DB.meritMatrix.splice(i,1);renderMatrix();}
+function saveMatrix(){
+  if(!can('editMatrix')&&!isSA()){alert('Super Admin or Admin (with editMatrix permission) only.');return;}
+  DB.matrixCaps={exceptional:+document.getElementById('cap-exc').value||5000,strong:+document.getElementById('cap-str').value||3500,meets:+document.getElementById('cap-mts').value||2100};
+  alert('Matrix saved (session only).');
+}
+function prefillIncrement(){
+  const id=document.getElementById('inc-emp').value;if(!id)return;
+  const emp=DB.employees.find(e=>e.id===id);if(!emp)return;
+  if(!can('viewSalary')){document.getElementById('inc-breakdown').innerHTML='<div class="alert a-red"><span>⚠</span><div>No salary view permission.</div></div>';return;}
+  document.getElementById('inc-gross').value=emp.gross;
+  const last=DB.appraisals.filter(a=>a.emp===id).sort((a,b)=>b.final-a.final)[0];
+  if(last){document.getElementById('inc-score').value=last.final;suggestBand();}
+  calcIncrement();
+}
+function suggestBand(){
+  const s=+document.getElementById('inc-score').value;if(!s)return;
+  const b=s>=DB.bands.exceptional.min?'exceptional':s>=DB.bands.strong.min?'strong':s>=DB.bands.meets.min?'meets':'below';
+  document.getElementById('inc-band').value=b;calcIncrement();
+}
+function calcIncrement(){
+  const gross=+document.getElementById('inc-gross').value;const band=document.getElementById('inc-band').value;
+  if(!gross||!band){document.getElementById('inc-breakdown').innerHTML='<div style="color:var(--muted);font-size:12px">Enter salary and band.</div>';return;}
+  if(band==='below'){document.getElementById('inc-breakdown').innerHTML='<div class="alert a-red"><span>⚠</span><div>Below Expectations = 0% increment. Exception needs documentation.</div></div>';document.getElementById('inc-comp-card').style.display='none';return;}
+  let pct,monthlyInc,method;
+  const override=+document.getElementById('inc-override').value;
+  if(gross>=70000){
+    const cap=DB.matrixCaps[band]||0;monthlyInc=cap;pct=((cap/gross)*100).toFixed(2);method='≥₹70,000 cap: '+fmt(cap)+'/mo ('+band+')';
+  } else if(override){
+    pct=override;monthlyInc=Math.round(gross*pct/100);method='HR Override: '+pct+'% — '+(document.getElementById('inc-reason').value||'no reason');
+  } else {
+    const slab=DB.meritMatrix.find(s=>gross>=s.min&&gross<s.max);
+    if(!slab){document.getElementById('inc-breakdown').innerHTML='<div style="color:var(--red);font-size:12px">Salary outside configured matrix range. Add or edit slabs in Merit Matrix tab.</div>';return;}
+    pct=slab[band];monthlyInc=Math.round(gross*pct/100);method='Slab '+fmt(slab.min)+'–'+fmt(slab.max)+' · '+band+': '+pct+'%';
+  }
+  // Also show level-specific reference
+  const empId=document.getElementById('inc-emp').value;const emp=DB.employees.find(e=>e.id===empId);
+  let lvRef='';
+  if(emp){
+    const lv=DB.ladders[emp.dept]?.levels[emp.levelIdx];
+    if(lv)lvRef=`<div class="br-row"><span class="br-label">Level ref (${getDeptLevel(emp).name})</span><span class="br-val" style="font-size:11px;color:var(--teal)">Exc ${lv.incRef.exceptional}% · Str ${lv.incRef.strong}% · Mts ${lv.incRef.meets}%</span></div>`;
+  }
+  const newGross=gross+monthlyInc;
+  document.getElementById('inc-breakdown').innerHTML=`
+    <div class="breakdown">
+      <div class="br-row"><span class="br-label">Current Gross</span><span class="br-val">${fmt(gross)}</span></div>
+      <div class="br-row"><span class="br-label">Band</span><span class="br-val"><span class="badge ${bandCls(band)}">${band}</span></span></div>
+      ${lvRef}
+      <div class="br-row"><span class="br-label">Method</span><span class="br-val" style="font-size:11px;color:var(--muted)">${method}</span></div>
+      <div class="br-row"><span class="br-label">Increment %</span><span class="br-val">${pct}%</span></div>
+      <div class="br-row"><span class="br-label">Monthly Increment</span><span class="br-val" style="color:var(--green)">${fmt(monthlyInc)}</span></div>
+      <div class="br-row"><span>Proposed Monthly Gross</span><span class="br-val" style="color:var(--green)">${fmt(newGross)}</span></div>
+      <div class="br-row"><span>Annualised Increase</span><span class="br-val">${fmt(monthlyInc*12)}</span></div>
+      <div style="margin-top:8px" class="alert a-amber"><span>⚠</span><div>Proposal only — requires HR approval.</div></div>
+    </div>`;
+  document.getElementById('inc-comp-card').style.display='block';
+  document.getElementById('inc-comp').innerHTML=`<table class="tbl"><thead><tr><th>Component</th><th>Current</th><th>Proposed</th><th>Change</th></tr></thead><tbody>
+    <tr><td>Monthly Gross</td><td class="mono">${fmt(gross)}</td><td class="mono" style="color:var(--green)">${fmt(newGross)}</td><td class="mono">+${fmt(monthlyInc)}</td></tr>
+    <tr><td>Annual Gross</td><td class="mono">${fmt(gross*12)}</td><td class="mono" style="color:var(--green)">${fmt(newGross*12)}</td><td class="mono">+${fmt(monthlyInc*12)}</td></tr>
+    <tr><td>Increment %</td><td>—</td><td class="mono">${pct}%</td><td>—</td></tr>
+  </tbody></table>`;
+}
+
+// ════════════════════════════════════
+// PAYROLL
+// ════════════════════════════════════
+function prefillPayroll(){
+  const id=document.getElementById('pay-emp').value;if(!id)return;
+  const emp=DB.employees.find(e=>e.id===id);if(!emp)return;
+  if(!can('viewSalary')){alert('No salary access.');return;}
+  document.getElementById('pay-gross').value=emp.gross;
+  document.getElementById('pay-basic-pct').value=DB.statutory.basicPct;
+  calcPayroll();
+}
+function saveStatutory(){
+  const s=DB.statutory;
+  const ids=['empPF','erPF','pfCeiling','pfAdmin','edli','esiEmp','esiEr','esiCeiling','pfHC','esiHC','basicPct'];
+  ids.forEach(k=>{const el=document.getElementById('stat-'+k);if(el)s[k]=+el.value;});
+  alert('Statutory config saved. Verify with payroll professional.');
+}
+function calcPayroll(){
+  const gross=+document.getElementById('pay-gross').value||0;const bpct=+document.getElementById('pay-basic-pct').value||50;
+  const s=DB.statutory;
+  const basic=Math.round(gross*bpct/100);const hra=Math.round(basic*0.4);const conv=1600;const special=Math.max(0,gross-basic-hra-conv);
+  document.getElementById('pay-basic').value=basic;
+  const vpf=+document.getElementById('pay-vpf').value||0;const otHrs=+document.getElementById('pay-ot-hrs').value||0;const otRate=+document.getElementById('pay-ot-rate').value||0;const ot=otHrs*otRate;
+  const comm=+document.getElementById('pay-comm').value||0;const bonus=+document.getElementById('pay-bonus').value||0;const reimb=+document.getElementById('pay-reimb').value||0;
+  const lop=+document.getElementById('pay-lop').value||0;const lopDed=lop>0?Math.round(gross/26*lop):0;
+  const leDays=+document.getElementById('pay-le-days').value||0;const leAmt=leDays>0?Math.round(basic/26*leDays):0;
+  const loan=+document.getElementById('pay-loan').value||0;const tds=+document.getElementById('pay-tds').value||0;const otherDed=+document.getElementById('pay-other-ded').value||0;
+  const pfWage=Math.min(basic,s.pfCeiling);
+  const hc=DB.employees.filter(e=>e.status==='Active'||e.status==='Probation').length;
+  const pfOk=hc>=s.pfHC;const esiOk=hc>=s.esiHC&&gross<=s.esiCeiling;
+  const empPF=pfOk?Math.round(pfWage*s.empPF/100):0;const erPF=pfOk?Math.round(pfWage*s.erPF/100):0;
+  const pfAdmin=pfOk?Math.round(pfWage*s.pfAdmin/100):0;const edli=pfOk?Math.round(pfWage*s.edli/100):0;
+  const empESI=esiOk?Math.round(gross*s.esiEmp/100):0;const erESI=esiOk?Math.round(gross*s.esiEr/100):0;
+  const netPay=gross+ot+comm+bonus+reimb+leAmt-lopDed-empPF-vpf-empESI-loan-tds-otherDed;
+  const erCost=gross+erPF+pfAdmin+edli+erESI;
+  document.getElementById('pay-breakdown').innerHTML=`
+    <div class="breakdown">
+      <div class="br-row"><span class="br-label">Basic (${bpct}%)</span><span class="br-val">${fmt(basic)}</span></div>
+      <div class="br-row"><span class="br-label">HRA (40% of basic)</span><span class="br-val">${fmt(hra)}</span></div>
+      <div class="br-row"><span class="br-label">Conveyance <span class="hr-flag" style="font-size:9px">verify</span></span><span class="br-val">${fmt(conv)}</span></div>
+      <div class="br-row"><span class="br-label">Special Allowance</span><span class="br-val">${fmt(special)}</span></div>
+      ${ot?`<div class="br-row"><span class="br-label">Overtime</span><span class="br-val">+${fmt(ot)}</span></div>`:''}
+      ${lop?`<div class="br-row"><span class="br-label">LOP (${lop}d)</span><span class="br-val" style="color:var(--red)">−${fmt(lopDed)}</span></div>`:''}
+      <div class="br-row"><span class="br-label">Emp PF ${!pfOk?'<span class="badge b-muted">N/A</span>':''}</span><span class="br-val" style="color:var(--red)">−${fmt(empPF)}</span></div>
+      ${vpf?`<div class="br-row"><span class="br-label">Voluntary PF</span><span class="br-val" style="color:var(--red)">−${fmt(vpf)}</span></div>`:''}
+      <div class="br-row"><span class="br-label">ESI ${!esiOk?'<span class="badge b-muted">N/A</span>':''}</span><span class="br-val" style="color:var(--red)">−${fmt(empESI)}</span></div>
+      ${loan?`<div class="br-row"><span class="br-label">Loan Recovery</span><span class="br-val" style="color:var(--red)">−${fmt(loan)}</span></div>`:''}
+      <div class="br-row"><span class="br-label">TDS <span class="hr-flag" style="font-size:9px">verify</span></span><span class="br-val" style="color:var(--red)">−${fmt(tds)}</span></div>
+      <div class="br-row" style="font-size:14px"><span>Net Pay</span><span class="br-val" style="color:var(--green);font-size:16px">${fmt(netPay)}</span></div>
+      <div class="br-row"><span class="br-label">Total Employer Cost</span><span class="br-val" style="color:var(--accent)">${fmt(erCost)}</span></div>
+    </div>
+    <div class="alert a-red" style="margin-top:10px"><span>⚠</span><div>Verify PF applicability (≥${s.pfHC} employees), ESI ceiling (≤${fmt(s.esiCeiling)}/mo), and TDS with a payroll professional before use.</div></div>`;
+  const id=document.getElementById('pay-emp').value;const month=document.getElementById('pay-month').value;
+  if(id&&month){const idx=DB.payrollRecords.findIndex(r=>r.emp===id&&r.month===month);const rec={emp:id,month,gross,empPF,empESI,tds,lopDed,netPay,erCost};if(idx>=0)DB.payrollRecords[idx]=rec;else DB.payrollRecords.push(rec);}
+}
+function renderPayHistory(){
+  const q=(document.getElementById('pay-search')?.value||'').toLowerCase();
+  const rows=DB.payrollRecords.filter(r=>{const e=DB.employees.find(x=>x.id===r.emp);return !q||(e&&e.name.toLowerCase().includes(q))||r.month.includes(q);});
+  document.getElementById('pay-tbody').innerHTML=rows.length?rows.map(r=>{const e=DB.employees.find(x=>x.id===r.emp);return `<tr><td>${e?e.name:r.emp}</td><td class="mono">${r.month}</td><td class="mono">${fmt(r.gross)}</td><td class="mono">${fmt(r.empPF)}</td><td class="mono">${fmt(r.empESI)}</td><td class="mono">${fmt(r.tds)}</td><td class="mono">${fmt(r.lopDed)}</td><td class="mono" style="color:var(--green)">${fmt(r.netPay)}</td><td class="mono" style="color:var(--accent)">${fmt(r.erCost)}</td></tr>`;}).join(''):`<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:16px">No payroll records. Use calculator above.</td></tr>`;
+}
+
+// ════════════════════════════════════
+// LEAVE TRACKER
+// ════════════════════════════════════
+function renderLeaveTable(){
+  const q=(document.getElementById('leave-search')?.value||'').toLowerCase();
+  const yr=document.getElementById('leave-year')?.value||'2024-25';
+  const canEdit=can('editLeave');
+  document.getElementById('leave-tbody').innerHTML=visEmp().filter(e=>e.status!=='Resigned'&&e.status!=='Terminated'&&(!q||e.name.toLowerCase().includes(q))).map(e=>{
+    const key=e.id+'-'+yr;
+    if(!DB.leaveData[key])DB.leaveData[key]={el:Math.floor(diffDays(new Date(e.doj),new Date())/365*15),elTaken:0,clTaken:0,slTaken:0,lop:0,unpaid:0,notes:''};
+    const ld=DB.leaveData[key];
+    const bal=ld.el-ld.elTaken;
+    const inp=(f,val)=>canEdit?`<input type="number" value="${val}" min="0" onchange="updateLeave('${key}','${f}',+this.value)" style="width:60px;background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:3px 6px;color:var(--text)"/>`:val;
+    return `<tr>
+      <td><strong>${e.name}</strong></td><td>${e.dept}</td>
+      <td class="mono">${ld.el}</td>
+      <td>${inp('elTaken',ld.elTaken)}</td>
+      <td>${inp('clTaken',ld.clTaken)}</td>
+      <td>${inp('slTaken',ld.slTaken)}</td>
+      <td>${inp('lop',ld.lop)}</td>
+      <td>${inp('unpaid',ld.unpaid)}</td>
+      <td class="mono" style="color:${bal<0?'var(--red)':'var(--text)'}">${bal}</td>
+      <td>${canEdit?`<input type="text" value="${ld.notes}" onchange="updateLeave('${key}','notes',this.value)" placeholder="Notes" style="width:120px;background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:3px 6px;color:var(--text)"/>`:ld.notes}</td>
+    </tr>`;
+  }).join('');
+}
+function updateLeave(key,field,val){if(!DB.leaveData[key])DB.leaveData[key]={el:0,elTaken:0,clTaken:0,slTaken:0,lop:0,unpaid:0,notes:''};DB.leaveData[key][field]=val;}
+function saveLeaveData(){alert('Leave data saved (session only). Changes reflected immediately in table.');}
+
+// ════════════════════════════════════
+// OPERATIONS
+// ════════════════════════════════════
+const OB_LIST=[{t:'Send welcome email with joining details',c:'Pre-joining'},{t:'Set up laptop, email, tools, credentials',c:'IT'},{t:'Add to payroll (Finance — separate from HRMS)',c:'Payroll'},{t:'Collect PAN, Aadhaar, bank details, certificates',c:'Documents'},{t:'Issue ID card and access',c:'Admin'},{t:'HR induction: policies, leave, code of conduct',c:'HR'},{t:'Manager intro and KPI briefing',c:'Day 1'},{t:'Add to communication channels',c:'IT'},{t:'Set 30/60/90-day goals with manager',c:'Goals'},{t:'Schedule 30-day check-in with HR',c:'HR'}];
+const PROB_LIST=[{t:'30-day check-in completed',c:'Review'},{t:'60-day performance discussion',c:'Review'},{t:'KPI / goal tracking reviewed',c:'Performance'},{t:'Attendance reviewed',c:'HR'},{t:'Peer feedback collected',c:'Feedback'},{t:'Issues documented',c:'HR'},{t:'Outcome form signed by manager and HR Head',c:'Decision'}];
+const EXIT_LIST=[{t:'Resignation letter received',c:'HR'},{t:'Notice period confirmed; last day set',c:'HR'},{t:'Exit interview scheduled',c:'HR'},{t:'Knowledge transfer plan prepared',c:'Ops'},{t:'Assets returned: laptop, ID, cards',c:'Admin'},{t:'IT access revoked on last day',c:'IT'},{t:'Full & final settlement (Accounts)',c:'Finance'},{t:'Relieving letter and experience certificate drafted',c:'Documents'},{t:'Removed from payroll',c:'Payroll'},{t:'Exit feedback documented',c:'HR'}];
+function renderChecklist(cid,items){document.getElementById(cid).innerHTML=items.map((item,i)=>`<div class="cl-item" id="cl-${cid}-${i}"><input type="checkbox" id="clk-${cid}-${i}" onchange="toggleCL('${cid}',${i})"/><div><label for="clk-${cid}-${i}">${item.t}</label><div class="cl-cat">${item.c}</div></div></div>`).join('');}
+function toggleCL(l,i){const el=document.getElementById('cl-'+l+'-'+i);const ch=document.getElementById('clk-'+l+'-'+i);el.classList.toggle('done',ch.checked);}
+function renderChecklists(){renderChecklist('ob-list',OB_LIST);renderChecklist('prob-list',PROB_LIST);renderChecklist('exit-list',EXIT_LIST);}
+function renderProbTable(){
+  const prob=DB.employees.filter(e=>e.status==='Probation');
+  document.getElementById('prob-tbody').innerHTML=prob.length?prob.map(e=>{const pe=addMonths(new Date(e.doj),DB.scheduleRules.probMonths||3);const d=diffDays(new Date(),pe);return `<tr><td>${e.name}</td><td>${e.dept}</td><td>${fmtDate(e.doj)}</td><td>${fmtDate(pe)}</td><td><span class="badge ${d<0?'b-red':d<=30?'b-amber':'b-green'}">${d<0?'Overdue':d<=30?'Due soon':'Scheduled'}</span></td><td><button class="btn btn-secondary btn-xs">Review</button></td></tr>`;}).join(''):`<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:14px">No employees on probation.</td></tr>`;
+}
+const docKeys=['offer','pan','aadhaar','bank','pf','qual','photo','policies'];
+// ════════════════════════════════════
+// ADMIN
+// ════════════════════════════════════
+function renderUsersTable(){
+  document.getElementById('users-tbody').innerHTML=AUTH.users.map(u=>`
+    <tr>
+      <td class="mono" style="font-size:11px">${u.username}</td><td>${u.name}</td>
+      <td><span class="badge" style="background:${ROLE_CLR[u.role]+'22'};color:${ROLE_CLR[u.role]}">${ROLE_LBL[u.role]}</span></td>
+      <td style="font-size:11px">${u.dept||'All'}</td>
+      <td style="font-size:11px">${u.empId?DB.employees.find(e=>e.id===u.empId)?.name||u.empId:'—'}</td>
+      <td><span class="badge ${u.status==='active'?'b-green':'b-muted'}">${u.status}</span></td>
+      <td>${u.role!=='superadmin'?`<button class="btn btn-secondary btn-xs" onclick="editUser('${u.username}')">Edit</button> <button class="btn btn-${u.status==='active'?'danger':'green'} btn-xs" onclick="toggleUser('${u.username}')">${u.status==='active'?'Disable':'Enable'}</button>`:''}</td>
+    </tr>`).join('');
+}
+function openUserModal(){
+  if(!isSA()&&!can('admin')){alert('Admin or Super Admin only.');return;}
+  DB.editingUserId=null;document.getElementById('user-modal-title').textContent='Add User';
+  ['mu-user','mu-name','mu-pass'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mu-role').value='manager';document.getElementById('mu-status').value='active';
+  populateAllSelects();document.getElementById('user-modal').style.display='flex';
+}
+function editUser(username){
+  if(!isSA()){alert('Super Admin only.');return;}
+  DB.editingUserId=username;const u=AUTH.users.find(x=>x.username===username);if(!u)return;
+  document.getElementById('user-modal-title').textContent='Edit User';
+  document.getElementById('mu-user').value=u.username;document.getElementById('mu-name').value=u.name;
+  document.getElementById('mu-pass').value=u.password;document.getElementById('mu-role').value=u.role;document.getElementById('mu-status').value=u.status;
+  populateAllSelects();
+  setTimeout(()=>{document.getElementById('mu-dept').value=u.dept||'All';document.getElementById('mu-emp').value=u.empId||'';},40);
+  document.getElementById('user-modal').style.display='flex';
+}
+function saveUser(){
+  const username=document.getElementById('mu-user').value.trim();const name=document.getElementById('mu-name').value.trim();const pass=document.getElementById('mu-pass').value;
+  if(!username||!name||pass.length<6){alert('Username, name, and password (min 6 chars) required.');return;}
+  const obj={username,name,password:pass,role:document.getElementById('mu-role').value,dept:document.getElementById('mu-dept').value,empId:document.getElementById('mu-emp').value||null,status:document.getElementById('mu-status').value};
+  const idx=AUTH.users.findIndex(u=>u.username===username);
+  if(idx>=0){if(AUTH.users[idx].role==='superadmin'&&obj.role!=='superadmin'){alert('Cannot demote Super Admin.');return;}AUTH.users[idx]={...AUTH.users[idx],...obj};}
+  else AUTH.users.push(obj);
+  closeModal('user-modal');renderUsersTable();
+}
+function toggleUser(username){if(!isSA())return;const u=AUTH.users.find(x=>x.username===username);if(u&&u.role!=='superadmin'){u.status=u.status==='active'?'inactive':'active';renderUsersTable();}}
+const PERM_LABELS={dashboard:'Dashboard',employees:'View Employees',career:'Career Levels',appraisal:'Appraisals',levelreview:'Level Review',schedule:'Schedule',increment:'Increment Calc',payroll:'Payroll',leave:'Leave Tracker',operations:'HR Ops',admin:'Admin Panel',settings:'Settings',reminders:'Reminders',editEmployee:'Edit Employees',viewSalary:'View Salary',editAppraisal:'Fill Appraisals',finaliseAppraisal:'Finalise Appraisals',editMatrix:'Edit Merit Matrix',editWeights:'Edit Weights',viewAllEmployees:'View All Employees',editLeave:'Edit Leave',recordLevelChange:'Record Level Change'};
+function renderRolePerms(){
+  if(!isSA()){document.getElementById('role-perms-body').innerHTML='<div class="access-denied"><div style="font-size:30px">🔒</div><div>Super Admin only.</div></div>';return;}
+  document.getElementById('role-perms-body').innerHTML=['admin','manager','reviewer'].map(role=>`
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-head"><span class="card-title"><span class="badge" style="background:${ROLE_CLR[role]+'22'};color:${ROLE_CLR[role]}">${ROLE_LBL[role]}</span> — Permissions</span><button class="btn btn-primary btn-sm" onclick="savePerms('${role}')">Save</button></div>
+      <div class="card-body"><div class="perm-grid">${Object.keys(PERM_LABELS).map(p=>`<label class="perm-item"><input type="checkbox" id="perm-${role}-${p}" ${PERMS[role]?.[p]?'checked':''}/><span>${PERM_LABELS[p]}</span></label>`).join('')}</div></div>
+    </div>`).join('');
+}
+function savePerms(role){Object.keys(PERM_LABELS).forEach(p=>{const el=document.getElementById('perm-'+role+'-'+p);if(el)PERMS[role][p]=el.checked?1:0;});alert('Permissions saved for '+ROLE_LBL[role]+'. Applied to all '+role+' users immediately.');applyCtx();}
+function renderMgrTable(){
+  document.getElementById('mgr-tbody').innerHTML=MGR_ACCESS.length?MGR_ACCESS.map((g,i)=>`<tr><td>${AUTH.users.find(u=>u.username===g.manager)?.name||g.manager}</td><td style="font-size:11px">${g.type==='employee'?DB.employees.find(e=>e.id===g.target)?.name||g.target:g.type==='department'?g.target+' dept':'All teams'}</td><td><span class="badge b-muted">${g.type}</span></td><td style="font-size:11px">${g.by}</td><td><button class="btn btn-danger btn-xs" onclick="revokeAccess(${i})">Revoke</button></td></tr>`).join(''):`<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:14px">No grants. Managers see direct reports only by default.</td></tr>`;
+}
+function openMgrModal(){if(!isSA()){alert('Super Admin only.');return;}populateAllSelects();document.getElementById('mgr-modal').style.display='flex';}
+function saveMgrAccess(){
+  const mgr=document.getElementById('ma-mgr').value;const type=document.getElementById('ma-type').value;
+  const target=type==='employee'?document.getElementById('ma-emp').value:type==='department'?document.getElementById('ma-dept').value:'all';
+  if(!mgr){alert('Select a manager.');return;}
+  MGR_ACCESS.push({manager:mgr,type,target,by:me()?.name||'SA'});
+  closeModal('mgr-modal');renderMgrTable();
+}
+function revokeAccess(i){if(confirm('Revoke this access?')){MGR_ACCESS.splice(i,1);renderMgrTable();}}
+
+// ════════════════════════════════════
+// REMINDERS
+// ════════════════════════════════════
+function toggleReminderPanel(){document.getElementById('reminder-panel').classList.toggle('open');renderRPList();}
+function renderRPList(){
+  const today=new Date();
+  const pend=DB.reminders.filter(r=>r.status==='Pending').sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const dot=document.getElementById('bell-dot');dot.style.display=pend.length?'block':'none';
+  document.getElementById('rp-list').innerHTML=pend.length?pend.map(r=>{const d=diffDays(today,new Date(r.date));const col=d<0?'var(--red)':d<=7?'var(--amber)':'var(--green)';return `<div class="rp-item"><div style="font-size:14px;color:${col}">${r.type==='Appraisal'?'📋':r.type==='Level Review'?'🎯':r.type==='Probation'?'🕐':'🔔'}</div><div><div style="font-size:11px;color:var(--text)">${r.title}</div><div style="font-size:10px;color:var(--muted)">${fmtDate(r.date)} · ${d<0?'Overdue':d+' days'}</div></div></div>`;}).join(''):'<div style="padding:16px;color:var(--muted);font-size:12px;text-align:center">No pending reminders.</div>';
+}
+function autoReminders(){
+  const today=new Date();
+  DB.employees.forEach(e=>{
+    const nd=nextAprDate(e);const d=diffDays(today,nd);
+    if(d>=0&&d<=30){const exists=DB.reminders.some(r=>r.emp===e.id&&r.type==='Appraisal'&&r.status==='Pending');if(!exists)DB.reminders.push({id:DB.nextRemId++,title:'Appraisal due — '+e.name,emp:e.id,date:nd.toISOString().slice(0,10),type:'Appraisal',priority:'high',status:'Pending',notes:'Auto-generated'});}
+    const lDate=e.levelDate||e.doj;const mInLevel=diffDays(new Date(lDate),today)/30.4;
+    if(mInLevel>=DB.levelRules.minMonths){const exists=DB.reminders.some(r=>r.emp===e.id&&r.type==='Level Review'&&r.status==='Pending');if(!exists)DB.reminders.push({id:DB.nextRemId++,title:'Level review due — '+e.name,emp:e.id,date:new Date().toISOString().slice(0,10),type:'Level Review',priority:'medium',status:'Pending',notes:'Auto: '+mInLevel.toFixed(0)+' months in current level'});}
+  });
+  renderRPList();
+}
+function renderRemTable(){
+  document.getElementById('rem-tbody').innerHTML=DB.reminders.map(r=>{const emp=DB.employees.find(e=>e.id===r.emp);const d=diffDays(new Date(),new Date(r.date));return `<tr><td><strong>${r.title}</strong></td><td style="font-size:11px">${emp?emp.name:'—'}</td><td style="font-size:11px">${fmtDate(r.date)}</td><td><span class="badge b-muted">${r.type}</span></td><td><span class="badge ${r.priority==='high'?'b-red':r.priority==='medium'?'b-amber':'b-muted'}">${r.priority}</span></td><td><span class="badge ${r.status==='Done'?'b-green':'b-amber'}">${r.status}</span></td><td style="font-size:11px;color:var(--muted)">${r.notes||'—'}</td><td><button class="btn btn-green btn-xs" onclick="markDone(${r.id})">Done</button> <button class="btn btn-danger btn-xs" onclick="delRem(${r.id})">Del</button></td></tr>`;}).join('');
+}
+function openReminderModal(){populateAllSelects();document.getElementById('reminder-modal').style.display='flex';}
+function saveReminder(){const title=document.getElementById('rm-title').value.trim();if(!title){alert('Title required.');return;}DB.reminders.push({id:DB.nextRemId++,title,emp:document.getElementById('rm-emp').value,date:document.getElementById('rm-date').value,type:document.getElementById('rm-type').value,priority:document.getElementById('rm-pri').value,status:'Pending',notes:document.getElementById('rm-notes').value});closeModal('reminder-modal');renderRemTable();renderRPList();}
+function markDone(id){const r=DB.reminders.find(x=>x.id===id);if(r)r.status='Done';renderRemTable();renderRPList();}
+function delRem(id){if(confirm('Delete?')){DB.reminders=DB.reminders.filter(x=>x.id!==id);renderRemTable();renderRPList();}}
+
+// ════════════════════════════════════
+// LEAVE YEAR MANAGEMENT
+// ════════════════════════════════════
+function populateLeaveYearDropdown(){
+  const sel=document.getElementById('leave-year');
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML=DB.leaveYears.map(y=>`<option value="${y}">FY ${y}</option>`).join('');
+  if(cur&&DB.leaveYears.includes(cur))sel.value=cur;
+  else if(DB.leaveYears.length)sel.value=DB.leaveYears[0];
+}
+function openLeaveYearModal(){
+  renderLeaveYearList();
+  document.getElementById('leave-year-modal').style.display='flex';
+}
+function renderLeaveYearList(){
+  document.getElementById('leave-year-list').innerHTML=DB.leaveYears.map(y=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--surface2);border-radius:var(--r);border:1px solid var(--border)">
+      <span style="font-size:12px;font-weight:500;color:var(--text)">FY ${y}</span>
+      <button class="btn btn-danger btn-xs" onclick="removeLeaveYear('${y}')">Remove</button>
+    </div>`).join('');
+}
+function addLeaveYear(){
+  const val=document.getElementById('new-leave-year').value.trim();
+  if(!val){alert('Enter a year in format YYYY-YY (e.g. 2025-26)');return;}
+  if(!/^\d{4}-\d{2}$/.test(val)){alert('Format must be YYYY-YY e.g. 2025-26');return;}
+  if(DB.leaveYears.includes(val)){alert('This year already exists.');return;}
+  DB.leaveYears.unshift(val);
+  document.getElementById('new-leave-year').value='';
+  renderLeaveYearList();
+  populateLeaveYearDropdown();
+}
+function removeLeaveYear(y){
+  if(DB.leaveYears.length<=1){alert('Must keep at least one financial year.');return;}
+  if(!confirm('Remove FY '+y+'? Leave data for this year stays in memory but the year will not appear in the tracker.'))return;
+  DB.leaveYears=DB.leaveYears.filter(x=>x!==y);
+  renderLeaveYearList();
+  populateLeaveYearDropdown();
+}
+
+// ════════════════════════════════════
+// DEPARTMENT MANAGEMENT
+// ════════════════════════════════════
+function renderDeptTable(){
+  if(!isSA()&&!can('editMatrix')){
+    const tb=document.getElementById('dept-tbody');
+    if(tb)tb.innerHTML=`<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:14px">Super Admin or Admin with Edit Matrix permission only.</td></tr>`;
+    return;
+  }
+  document.getElementById('dept-tbody').innerHTML=allDepts().map(dept=>{
+    const empCount=DB.employees.filter(e=>e.dept===dept&&e.status!=='Resigned'&&e.status!=='Terminated').length;
+    const levelCount=DB.ladders[dept]?.levels.length||0;
+    const hasKPI=!!DB.kpiTemplates[dept];
+    return `<tr>
+      <td><strong>${dept}</strong></td>
+      <td><span class="badge ${empCount>0?'b-accent':'b-muted'}">${empCount} active</span></td>
+      <td>${levelCount} levels</td>
+      <td><span class="badge ${hasKPI?'b-green':'b-amber'}">${hasKPI?'Configured':'Default'}</span></td>
+      <td style="display:flex;gap:5px;flex-wrap:wrap">
+        <button class="btn btn-secondary btn-xs" onclick="openDeptModal('${dept}')">Rename</button>
+        ${empCount===0?`<button class="btn btn-danger btn-xs" onclick="removeDept('${dept}')">Remove</button>`:'<span style="font-size:10px;color:var(--faint);align-self:center">Has employees</span>'}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openDeptModal(existingName){
+  document.getElementById('dept-modal-title').textContent=existingName?'Rename Department':'Add Department';
+  document.getElementById('dm-name').value=existingName||'';
+  document.getElementById('dm-old-name').value=existingName||'';
+  document.getElementById('dm-desc').value='';
+  document.getElementById('dept-modal').style.display='flex';
+}
+
+function saveDept(){
+  if(!isSA()&&!can('editMatrix')){alert('Super Admin or Admin with editMatrix permission only.');return;}
+  const newName=document.getElementById('dm-name').value.trim();
+  const oldName=document.getElementById('dm-old-name').value.trim();
+  if(!newName){alert('Department name is required.');return;}
+
+  if(oldName&&oldName!==newName){
+    // RENAME
+    if(!DB.ladders[oldName]){alert('Original department not found.');return;}
+    if(DB.ladders[newName]){alert('A department with that name already exists.');return;}
+    // Migrate ladder
+    DB.ladders[newName]=DB.ladders[oldName];
+    delete DB.ladders[oldName];
+    // Migrate KPI template
+    if(DB.kpiTemplates[oldName]){DB.kpiTemplates[newName]=DB.kpiTemplates[oldName];delete DB.kpiTemplates[oldName];}
+    // Update all employees
+    DB.employees.forEach(e=>{if(e.dept===oldName)e.dept=newName;});
+    // Update all users
+    AUTH.users.forEach(u=>{if(u.dept===oldName)u.dept=newName;});
+    alert(`Department renamed from "${oldName}" to "${newName}". All employees and users updated.`);
+  } else if(!oldName||oldName===newName){
+    // ADD NEW
+    if(DB.ladders[newName]){alert('Department already exists. Use Rename to change the name.');return;}
+    DB.ladders[newName]={levels:[
+      {name:'Junior',salaryMin:18000,salaryMax:28000,incRef:{exceptional:25,strong:18,meets:12},desc:'Entry level — learning and executing under guidance.'},
+      {name:'Mid-level',salaryMin:28000,salaryMax:50000,incRef:{exceptional:20,strong:14,meets:9},desc:'Independent contributor. Handles most tasks without supervision.'},
+      {name:'Senior',salaryMin:50000,salaryMax:90000,incRef:{exceptional:15,strong:10,meets:7},desc:'Expert. Leads workstreams, mentors others.'},
+    ]};
+    DB.kpiTemplates[newName]=[
+      {kpi:'Quality of output',weight:30},{kpi:'Timeliness and deadlines',weight:30},{kpi:'Collaboration and communication',weight:20},{kpi:'Learning and growth',weight:20}
+    ];
+    alert(`Department "${newName}" added with a default 3-level ladder and KPI template. Customise both in the Career Levels tabs.`);
+  }
+
+  closeModal('dept-modal');
+  autoPopDeptFilters();
+  populateAllSelects();
+  renderDeptTable();
+  renderCareerLadders();
+  careerActiveDept=newName;
+}
+
+function removeDept(dept){
+  if(!isSA()){alert('Super Admin only.');return;}
+  const empCount=DB.employees.filter(e=>e.dept===dept&&e.status!=='Resigned'&&e.status!=='Terminated').length;
+  if(empCount>0){alert(`Cannot remove "${dept}" — ${empCount} active employee(s) belong to it. Reassign them first.`);return;}
+  if(!confirm(`Permanently remove department "${dept}"? Its career ladder and KPI template will also be deleted.`))return;
+  delete DB.ladders[dept];
+  delete DB.kpiTemplates[dept];
+  autoPopDeptFilters();
+  populateAllSelects();
+  renderDeptTable();
+  if(careerActiveDept===dept)careerActiveDept=allDepts()[0]||null;
+  renderCareerLadders();
+  alert(`Department "${dept}" removed.`);
+}
+
+// ════════════════════════════════════
+// SHARE ACCESS
+// ════════════════════════════════════
+function renderShareSummary(){
+  const sel=document.getElementById('share-user');
+  if(sel){
+    sel.innerHTML='<option value="">Select user</option>'+AUTH.users.map(u=>`<option value="${u.username}">${u.name} (${ROLE_LBL[u.role]})</option>`).join('');
+  }
+  // Summary table
+  const tb=document.getElementById('share-summary-tbody');if(!tb)return;
+  tb.innerHTML=AUTH.users.map(u=>{
+    const p=PERMS[u.role]||{};
+    const canSee=Object.entries(PERM_LABELS).filter(([k])=>p[k]||u.role==='superadmin').map(([,v])=>v);
+    const cannotSee=Object.entries(PERM_LABELS).filter(([k])=>!(p[k]||u.role==='superadmin')).map(([,v])=>v);
+    return `<tr>
+      <td><strong>${u.name}</strong></td>
+      <td class="mono" style="font-size:11px">${u.username}</td>
+      <td><span class="badge" style="background:${ROLE_CLR[u.role]+'22'};color:${ROLE_CLR[u.role]}">${ROLE_LBL[u.role]}</span></td>
+      <td style="font-size:11px;color:var(--muted)">${u.dept||'All'}</td>
+      <td style="font-size:11px;color:var(--green);max-width:180px;line-height:1.6">${canSee.join(', ')}</td>
+      <td style="font-size:11px;color:var(--red);max-width:160px;line-height:1.6">${cannotSee.length?cannotSee.join(', '):'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function generateShareInfo(){
+  const username=document.getElementById('share-user').value;
+  if(!username){document.getElementById('share-output').style.display='none';return;}
+  const u=AUTH.users.find(x=>x.username===username);if(!u)return;
+  const p=PERMS[u.role]||{};
+  const canSee=Object.entries(PERM_LABELS).filter(([k])=>p[k]||u.role==='superadmin').map(([,v])=>v).join(', ');
+  const cannotSee=Object.entries(PERM_LABELS).filter(([k])=>!(p[k]||u.role==='superadmin')).map(([,v])=>v).join(', ')||'Nothing restricted';
+  document.getElementById('share-role-display').value=ROLE_LBL[u.role]+' — '+u.dept;
+  document.getElementById('share-username-out').textContent=u.username;
+  document.getElementById('share-pass-out').textContent=u.password;
+  document.getElementById('share-access-out').innerHTML=`<span class="badge" style="background:${ROLE_CLR[u.role]+'22'};color:${ROLE_CLR[u.role]}">${ROLE_LBL[u.role]}</span>`;
+  document.getElementById('share-can-view').textContent=canSee;
+  document.getElementById('share-cannot').textContent=cannotSee;
+  document.getElementById('share-output').style.display='block';
+}
+
+function copyShareInfo(){
+  const username=document.getElementById('share-username-out').textContent;
+  const pass=document.getElementById('share-pass-out').textContent;
+  const text=`Apexure HRMS Access\nUsername: ${username}\nPassword: ${pass}\nShare securely — do not forward.`;
+  navigator.clipboard?.writeText(text).then(()=>alert('Credentials copied to clipboard.')).catch(()=>alert(`Username: ${username}\nPassword: ${pass}`));
+}
+
+// ════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════
+function initSettings(){
+  // Pre-fill my account
+  const u=me();
+  if(u){
+    const nameEl=document.getElementById('acc-name');
+    if(nameEl)nameEl.value=u.name;
+  }
+  // Pre-fill super admin fields (SA only)
+  if(isSA()){
+    const sa=AUTH.users.find(x=>x.role==='superadmin');
+    if(sa){
+      const saName=document.getElementById('sa-name');if(saName)saName.value=sa.name;
+      const saUser=document.getElementById('sa-username');if(saUser)saUser.value=sa.username;
+    }
+    const bc=document.getElementById('brand-company');if(bc)bc.value=DB.branding.company;
+    const bt=document.getElementById('brand-title');if(bt)bt.value=DB.branding.title;
+  }
+  renderDataSummary();
+  renderFYList();
+}
+
+function changeMyPassword(){
+  const u=me();if(!u){alert('Not logged in.');return;}
+  const cur=document.getElementById('acc-cur-pass').value;
+  const nw=document.getElementById('acc-new-pass').value;
+  const conf=document.getElementById('acc-conf-pass').value;
+  if(cur!==u.password){alert('Current password is incorrect.');return;}
+  if(nw.length<6){alert('New password must be at least 6 characters.');return;}
+  if(nw!==conf){alert('New passwords do not match.');return;}
+  const user=AUTH.users.find(x=>x.username===u.username);
+  if(user)user.password=nw;
+  AUTH.current.password=nw;
+  document.getElementById('acc-cur-pass').value='';
+  document.getElementById('acc-new-pass').value='';
+  document.getElementById('acc-conf-pass').value='';
+  alert('Password changed successfully for this session.');
+}
+
+function changeMyName(){
+  const u=me();if(!u)return;
+  const nm=document.getElementById('acc-name').value.trim();
+  if(!nm){alert('Name cannot be empty.');return;}
+  const user=AUTH.users.find(x=>x.username===u.username);
+  if(user){user.name=nm;AUTH.current.name=nm;}
+  applyCtx();
+  alert('Display name updated to "'+nm+'".');
+}
+
+function saveSuperAdminSettings(){
+  if(!isSA()){alert('Super Admin only.');return;}
+  const sa=AUTH.users.find(x=>x.role==='superadmin');if(!sa)return;
+  const newName=document.getElementById('sa-name').value.trim();
+  const newUser=document.getElementById('sa-username').value.trim();
+  const newPass=document.getElementById('sa-pass').value;
+  const confPass=document.getElementById('sa-pass2').value;
+  if(!newName||!newUser){alert('Name and username cannot be empty.');return;}
+  if(newPass&&newPass.length<6){alert('Password must be at least 6 characters.');return;}
+  if(newPass&&newPass!==confPass){alert('Passwords do not match.');return;}
+  // Check no duplicate username
+  const dupe=AUTH.users.find(x=>x.username===newUser&&x.role!=='superadmin');
+  if(dupe){alert('That username is already taken by another user.');return;}
+  sa.name=newName;sa.username=newUser;
+  if(newPass)sa.password=newPass;
+  // Update current session
+  if(AUTH.current&&AUTH.current.role==='superadmin'){
+    AUTH.current.name=newName;AUTH.current.username=newUser;
+    if(newPass)AUTH.current.password=newPass;
+  }
+  document.getElementById('sa-pass').value='';
+  document.getElementById('sa-pass2').value='';
+  applyCtx();
+  alert('Super Admin settings updated.\nNew username: '+newUser+'\nNew name: '+newName+(newPass?'\nPassword changed.':''));
+}
+
+function saveBranding(){
+  const company=document.getElementById('brand-company').value.trim();
+  const title=document.getElementById('brand-title').value.trim();
+  if(!company||!title){alert('Company and title cannot be empty.');return;}
+  DB.branding.company=company;DB.branding.title=title;
+  // Update sidebar brand
+  document.querySelector('.brand-name').textContent='Apexure '+title;
+  document.querySelector('.brand-sub').textContent=me()?'v4 · '+ROLE_LBL[me().role]:'v4';
+  alert('Branding updated. Company: '+company);
+}
+
+function renderDataSummary(){
+  const el=document.getElementById('data-summary');if(!el)return;
+  el.innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
+      <div style="background:var(--surface2);border-radius:var(--r);padding:12px"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">EMPLOYEES</div><div style="font-size:20px;font-family:var(--head)">${DB.employees.length}</div></div>
+      <div style="background:var(--surface2);border-radius:var(--r);padding:12px"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">APPRAISALS</div><div style="font-size:20px;font-family:var(--head)">${DB.appraisals.length}</div></div>
+      <div style="background:var(--surface2);border-radius:var(--r);padding:12px"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">PAYROLL RECORDS</div><div style="font-size:20px;font-family:var(--head)">${DB.payrollRecords.length}</div></div>
+      <div style="background:var(--surface2);border-radius:var(--r);padding:12px"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">LEVEL CHANGES</div><div style="font-size:20px;font-family:var(--head)">${DB.levelHistory.length}</div></div>
+      <div style="background:var(--surface2);border-radius:var(--r);padding:12px"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">REMINDERS</div><div style="font-size:20px;font-family:var(--head)">${DB.reminders.length}</div></div>
+      <div style="background:var(--surface2);border-radius:var(--r);padding:12px"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">USERS</div><div style="font-size:20px;font-family:var(--head)">${AUTH.users.length}</div></div>
+    </div>
+    <div class="alert a-red" style="margin-top:12px"><span>⚠</span><div>All data above lives in browser session memory only. It will be permanently lost when you refresh or close the tab. Export CSVs regularly as a backup until a database backend is connected.</div></div>`;
+}
+
+function renderFYList(){
+  const el=document.getElementById('fy-list');if(!el)return;
+  el.innerHTML=DB.leaveYears.map(y=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--surface2);border-radius:var(--r);border:1px solid var(--border)">
+      <span style="font-size:12px;font-weight:500;color:var(--text)">FY ${y}</span>
+      <button class="btn btn-danger btn-xs" onclick="removeFY('${y}')">Remove</button>
+    </div>`).join('');
+}
+function addFY(){
+  const val=document.getElementById('new-fy').value.trim();
+  if(!/^\d{4}-\d{2}$/.test(val)){alert('Format: YYYY-YY e.g. 2025-26');return;}
+  if(DB.leaveYears.includes(val)){alert('Year already exists.');return;}
+  DB.leaveYears.unshift(val);
+  document.getElementById('new-fy').value='';
+  renderFYList();
+  populateLeaveYearDropdown();
+}
+function removeFY(y){
+  if(DB.leaveYears.length<=1){alert('Keep at least one year.');return;}
+  if(!confirm('Remove FY '+y+'?'))return;
+  DB.leaveYears=DB.leaveYears.filter(x=>x!==y);
+  renderFYList();
+  populateLeaveYearDropdown();
+}
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>document.getElementById('login-user')?.focus(),80);});
 </script>
 </body>
 </html>
