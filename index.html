@@ -390,7 +390,7 @@ select option{background:var(--surface2)}
           <div class="fg"><label>HR Notes</label><textarea id="apr-hr-note" placeholder="HR validation, exceptions, context…"></textarea></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:4px">
-          <button class="btn btn-primary" onclick="saveAppraisal()">Save Appraisal</button>
+          <button class="btn btn-primary" onclick="async function saveAppraisal() {   const appraisalData = {     employee: document.getElementById('apr-emp').value,     period: document.getElementById('apr-period').value,     score: document.getElementById('final-score').textContent,     band: document.getElementById('final-band').textContent,     managerComment: document.getElementById('apr-mgr-comment').value,     hrNote: document.getElementById('apr-hr-note').value,     timestamp: new Date().toISOString()   };    if (window.supabase) {     const { error } = await window.supabase       .from('appraisals')       .insert([{ data: appraisalData }]);          if (error) {       alert("Database Error: " + error.message);       return;     }   }    alert("Appraisal saved permanently to Supabase!"); }()">Save Appraisal</button>
           <button class="btn btn-secondary" onclick="calcApr()">Recalculate</button>
         </div>
       </div>
@@ -1582,7 +1582,7 @@ function saveBands(){
   DB.bands={exceptional:{min:+document.getElementById('band-exc-min').value,max:+document.getElementById('band-exc-max').value,label:document.getElementById('band-exc-label').value},strong:{min:+document.getElementById('band-str-min').value,max:+document.getElementById('band-str-max').value,label:document.getElementById('band-str-label').value},meets:{min:+document.getElementById('band-mts-min').value,max:+document.getElementById('band-mts-max').value,label:document.getElementById('band-mts-label').value},below:{min:+document.getElementById('band-blw-min').value,max:+document.getElementById('band-blw-max').value,label:document.getElementById('band-blw-label').value}};
   alert('Performance bands saved.');
 }
-function saveAppraisal(){
+function async function saveAppraisal() {   const appraisalData = {     employee: document.getElementById('apr-emp').value,     period: document.getElementById('apr-period').value,     score: document.getElementById('final-score').textContent,     band: document.getElementById('final-band').textContent,     managerComment: document.getElementById('apr-mgr-comment').value,     hrNote: document.getElementById('apr-hr-note').value,     timestamp: new Date().toISOString()   };    if (window.supabase) {     const { error } = await window.supabase       .from('appraisals')       .insert([{ data: appraisalData }]);          if (error) {       alert("Database Error: " + error.message);       return;     }   }    alert("Appraisal saved permanently to Supabase!"); }(){
   if(!can('editAppraisal')){alert('Permission denied.');return;}
   const id=document.getElementById('apr-emp').value;if(!id){alert('Select an employee.');return;}
   const sc=calcApr();
