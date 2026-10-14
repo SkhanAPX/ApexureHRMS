@@ -2318,3 +2318,28 @@ window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>document.getEleme
   window.supabase = createClient(supabaseUrl, supabaseKey);
   console.log("Supabase connected successfully!");
 </script>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const supabaseUrl = 'https://pnovrrkykimjknqdhoww.supabase.co';
+  const supabaseKey = 'sb_publishable_mHCsBIqRC5QN6QJLc753TQ_aRABbSwo';
+
+  window.supabase = createClient(supabaseUrl, supabaseKey);
+  console.log("Supabase connected successfully!");
+
+  // Universal save function for all HRMS modules
+  window.saveToSupabase = async function(tableName, payload) {
+    if (!window.supabase) return;
+    const { data, error } = await window.supabase
+      .from(tableName)
+      .insert([{ data: payload }]);
+    
+    if (error) {
+      console.error("Save error:", error);
+      alert("Database Error: " + error.message);
+    } else {
+      console.log("Saved successfully to " + tableName, data);
+    }
+  };
+</script>
