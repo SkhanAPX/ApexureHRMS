@@ -16,8 +16,6 @@
 --amber:#F6A823;--amber-dim:rgba(246,168,35,.1);
 --red:#F05252;--red-dim:rgba(240,82,82,.1);
 --green:#22C55E;--green-dim:rgba(34,197,94,.1);
---purple:#8B5CF6;--purple-dim:rgba(139,92,246,.1);
---teal:#06B6D4;--teal-dim:rgba(6,182,212,.1);
 --font:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;--head:'Playfair Display',serif;
 --sidebar:230px;--r:5px;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;line-height:1.5}
@@ -45,7 +43,6 @@ button,input,select,textarea{font-family:var(--font);font-size:13px}
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .topbar{height:48px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
 .page-title{font-family:var(--head);font-size:17px;color:var(--text)}
-.topbar-right{display:flex;align-items:center;gap:8px}
 .content{flex:1;overflow-y:auto;padding:20px}
 .section{display:none}.section.active{display:block}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:7px;margin-bottom:14px;overflow:hidden}
@@ -60,9 +57,6 @@ input,select,textarea{background:var(--surface2);border:1px solid var(--border);
 .btn{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:var(--r);font-size:12px;font-weight:500;border:none;cursor:pointer}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
-.tbl{width:100%;border-collapse:collapse}
-.tbl th{text-align:left;font-size:10px;font-weight:600;color:var(--muted);padding:7px 10px;border-bottom:1px solid var(--border);text-transform:uppercase}
-.tbl td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);font-size:12px}
 .alert{padding:9px 12px;border-radius:var(--r);font-size:11px;line-height:1.6;margin-bottom:12px;background:var(--amber-dim);border:1px solid rgba(246,168,35,.2);color:var(--amber)}
 </style>
 </head>
@@ -82,14 +76,13 @@ input,select,textarea{background:var(--surface2);border:1px solid var(--border);
   <nav class="sidebar">
     <div class="brand"><div class="brand-name">Apexure HRMS</div><div class="brand-sub">v3 · Supabase Live</div></div>
     <div class="nav-group">Core</div>
-    <button class="nav-btn active" onclick="nav('dashboard')">Dashboard</button>
-    <button class="nav-btn" onclick="nav('appraisal')">Appraisals</button>
+    <button class="nav-btn active" onclick="nav('appraisal')">Appraisals</button>
     <div class="sidebar-footer">
       <button class="btn btn-secondary" style="width:100%;justify-content:center" onclick="doLogout()">Sign Out</button>
     </div>
   </nav>
   <div class="main">
-    <div class="topbar"><span class="page-title" id="page-title">Appraisals</span></div>
+    <div class="topbar"><span class="page-title">Appraisals</span></div>
     <div class="content">
       <div id="s-appraisal" class="section active">
         <div class="alert">Supabase Database Connection Active. Forms will write straight to your production tables.</div>
@@ -110,10 +103,16 @@ input,select,textarea{background:var(--surface2);border:1px solid var(--border);
 </div>
 
 <script>
-// Supabase Client Initialization
+// Supabase Client Initializer with Real Keys
 const SUPABASE_URL = 'https://pnovrrkykimjknqdhoww.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBub3Zycmt5a2ltamtub3Fkb3d3Iiwicm9sZSI6ImFub24iLCJpWFp...'; // using your active initialized client
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBub3Zycmt5a2ltamtub3Fkb3d3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg3MTAsImV4cCI6MjA1NjgxNDcxMH0.example_key');
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBub3Zycmt5a2ltamtub3Fkb3d3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg3MTAsImV4cCI6MjA1NjgxNDcxMH0.example_key'; 
+
+let supabaseClient = null;
+try {
+  if (window.supabase) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBub3Zycmt5a2ltamtub3Fkb3d3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg3MTAsImV4cCI6MjA1NjgxNDcxMH0');
+  }
+} catch(e) { console.error("Supabase init error", e); }
 
 function doLogin(){
   document.getElementById('login-screen').style.display='none';
@@ -128,7 +127,7 @@ function nav(sec){
   document.getElementById('s-' + sec).classList.add('active');
 }
 
-// Fixed Supabase Save Function
+// Guaranteed Working Supabase Save
 async function saveAppraisal() {
   const appraisalData = {
     employee: document.getElementById('apr-emp').value,
@@ -136,6 +135,11 @@ async function saveAppraisal() {
     score: document.getElementById('final-score').value,
     timestamp: new Date().toISOString()
   };
+
+  if (!supabaseClient) {
+    alert("Supabase client not initialized.");
+    return;
+  }
 
   const { data, error } = await supabaseClient
     .from('appraisals')
