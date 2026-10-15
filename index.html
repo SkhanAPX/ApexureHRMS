@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Apexure HRMS v3</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@600&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -2298,3 +2299,30 @@ window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>document.getEleme
 </script>
 </body>
 </html>
+<script>
+// Supabase Client Setup
+const SUPABASE_URL = 'https://pnovrrkykimjknqdhoww.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_mHCsBIqRC5QN6QJLc753TQ_aRABbSwo';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Direct Save to Supabase Function
+async function saveAppraisal() {
+  const appraisalData = {
+    employee: document.getElementById('apr-emp') ? document.getElementById('apr-emp').value : '',
+    period: document.getElementById('apr-period') ? document.getElementById('apr-period').value : '',
+    score: document.getElementById('final-score') ? document.getElementById('final-score').textContent : '',
+    band: document.getElementById('final-band') ? document.getElementById('final-band').textContent : '',
+    timestamp: new Date().toISOString()
+  };
+
+  const { error } = await supabaseClient
+    .from('appraisals')
+    .insert([{ data: appraisalData }]);
+  
+  if (error) {
+    alert("Database Error: " + error.message);
+  } else {
+    alert("Appraisal saved permanently to Supabase!");
+  }
+}
+</script>
